@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Total Arm Care — Operations Portal</title>
+<style>
+  :root {
+    --tac-ink: #15233b;
+    --tac-ink-2: #20324f;
+    --tac-orange: #F26A1B;
+    --tac-orange-dark: #D2540C;
+    --tac-orange-soft: #fdeadb;
+    --tac-blue: #1E64C8;
+    --tac-blue-dark: #154d9c;
+    --tac-blue-soft: #e6effb;
+    --tac-text: #1b2434;
+    --tac-muted: #647089;
+    --tac-line: #e4e8ef;
+    --tac-bg: #f4f6fa;
+    --tac-green: #1f9d57;
+    --tac-green-soft: #e3f6ec;
+    --tac-red: #d23b3b;
+    --tac-red-soft: #fce8e8;
+    --tac-amber: #b5780c;
+    --tac-amber-soft: #fdf0d6;
+    --focus: 0 0 0 3px rgba(30,100,200,0.35);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif; background: var(--tac-bg); color: var(--tac-text); font-size: 15px; line-height: 1.45; }
+  .app { display: flex; min-height: 100vh; }
+
+  /* Accessibility helpers */
+  :focus-visible { outline: none; box-shadow: var(--focus); border-radius: 6px; }
+  .skip-link { position: absolute; left: -999px; top: 8px; background: var(--tac-ink); color: #fff; padding: 10px 16px; border-radius: 6px; z-index: 200; }
+  .skip-link:focus { left: 8px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* Sidebar */
+  .sidebar { width: 256px; background: var(--tac-ink); color: #c7d0df; flex-shrink: 0; display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; }
+  .brand { padding: 18px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; gap: 12px; align-items: center; }
+  .brand-logo { width: 42px; height: 42px; border-radius: 9px; background: var(--tac-orange); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 15px; letter-spacing: 0.5px; flex-shrink: 0; }
+  .brand-name { font-weight: 800; color: white; font-size: 15px; letter-spacing: 0.2px; line-height: 1.1; }
+  .brand-sub { font-size: 11px; color: #8c99ad; margin-top: 3px; }
+  .nav { flex: 1; overflow-y: auto; padding: 12px 10px; }
+  .nav-group { margin-bottom: 2px; }
+  .nav-item { width: 100%; text-align: left; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: none; background: transparent; border-radius: 8px; font-size: 13.5px; cursor: pointer; color: #c7d0df; transition: background 0.12s, color 0.12s; font-weight: 600; font-family: inherit; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+  .nav-item.active { background: var(--tac-orange); color: #fff; }
+  .nav-item .ico { width: 18px; text-align: center; font-size: 15px; opacity: 0.95; flex-shrink: 0; }
+  .nav-item .arrow { margin-left: auto; font-size: 11px; opacity: 0.8; transition: transform 0.15s; }
+  .nav-item.expanded .arrow { transform: rotate(90deg); }
+  .sub-nav { margin: 2px 0 4px 0; padding-left: 30px; display: none; }
+  .sub-nav.open { display: block; }
+  .sub-item { width: 100%; text-align: left; padding: 8px 12px; font-size: 12.5px; color: #9aa6ba; cursor: pointer; border-radius: 7px; border: none; background: transparent; font-weight: 600; font-family: inherit; }
+  .sub-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+  .sub-item.active { color: #fff; background: var(--tac-blue); }
+  .user-box { padding: 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; gap: 10px; align-items: center; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--tac-blue); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .user-name { color: white; font-weight: 700; font-size: 13.5px; }
+  .user-role { color: #8c99ad; font-size: 11px; }
+
+  /* Main */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar { background: white; border-bottom: 1px solid var(--tac-line); padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 20; gap: 16px; }
+  .topbar-title { font-size: 21px; font-weight: 800; color: var(--tac-ink); letter-spacing: -0.3px; }
+  .topbar-sub { font-size: 12.5px; color: var(--tac-muted); margin-top: 2px; }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+  .content { flex: 1; padding: 26px 28px; overflow-y: auto; }
+
+  /* Buttons */
+  .btn { padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; border: 1px solid transparent; cursor: pointer; transition: background 0.12s, border-color 0.12s; font-family: inherit; display: inline-flex; align-items: center; gap: 7px; line-height: 1.2; }
+  .btn-primary { background: var(--tac-orange); color: white; }
+  .btn-primary:hover { background: var(--tac-orange-dark); }
+  .btn-blue { background: var(--tac-blue); color: white; }
+  .btn-blue:hover { background: var(--tac-blue-dark); }
+  .btn-secondary { background: white; color: var(--tac-ink); border-color: var(--tac-line); }
+  .btn-secondary:hover { background: #f7f9fc; border-color: #c9d2e0; }
+  .btn-ghost { background: transparent; color: var(--tac-muted); }
+  .btn-ghost:hover { background: #eef1f6; color: var(--tac-ink); }
+  .btn-danger { background: var(--tac-red-soft); color: var(--tac-red); }
+  .btn-danger:hover { background: #f7d9d9; }
+  .btn-sm { padding: 6px 11px; font-size: 12px; border-radius: 7px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Search */
+  .search { position: relative; flex: 0 0 auto; }
+  .search input { padding: 9px 12px 9px 34px; border: 1px solid var(--tac-line); border-radius: 8px; font-size: 13.5px; width: 280px; outline: none; font-family: inherit; background: #fff; }
+  .search input:focus { border-color: var(--tac-blue); box-shadow: var(--focus); }
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #9aa6ba; pointer-events: none; }
+
+  /* Cards */
+  .card { background: white; border: 1px solid var(--tac-line); border-radius: 12px; padding: 20px; }
+  .card-tight { padding: 14px 16px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+  .mb-4 { margin-bottom: 16px; } .mb-5 { margin-bottom: 22px; } .mt-3 { margin-top: 12px; } .mt-4 { margin-top: 16px; }
+  h2 { font-size: 18px; font-weight: 800; color: var(--tac-ink); letter-spacing: -0.2px; }
+  h3 { font-size: 14px; font-weight: 800; color: var(--tac-ink); }
+  .flex { display: flex; } .between { justify-content: space-between; } .center { align-items: center; }
+  .wrap { flex-wrap: wrap; }
+  .gap-2 { gap: 8px; } .gap-3 { gap: 12px; }
+  .muted { color: var(--tac-muted); }
+  .small { font-size: 13px; } .xs { font-size: 11.5px; }
+  .b { font-weight: 700; }
+  .text-right { text-align: right; } .text-center { text-align: center; }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; }
+
+  .stat-card { background: white; border: 1px solid var(--tac-line); border-radius: 12px; padding: 18px; border-top: 3px solid var(--tac-orange); }
+  .stat-card.blue { border-top-color: var(--tac-blue); }
+  .stat-label { font-size: 12px; color: var(--tac-muted); font-weight: 600; }
+  .stat-value { font-size: 27px; font-weight: 800; color: var(--tac-ink); margin-top: 5px; letter-spacing: -0.5px; }
+  .stat-sub { font-size: 12px; color: var(--tac-muted); margin-top: 3px; }
+  .stat-sub.up { color: var(--tac-green); font-weight: 600; }
+  .stat-sub.down { color: var(--tac-red); font-weight: 600; }
+  button.stat-card, button.card { text-align: left; font-family: inherit; cursor: pointer; width: 100%; }
+  button.stat-card:hover, button.card.clickable:hover { border-color: #c9d2e0; background: #fcfdff; }
+
+  /* Hero */
+  .hero { background: linear-gradient(120deg, var(--tac-ink) 0%, #243a5e 100%); color: white; padding: 28px 30px; border-radius: 14px; margin-bottom: 20px; position: relative; overflow: hidden; }
+  .hero::after { content: ""; position: absolute; top: 0; right: 0; width: 240px; height: 100%; background: radial-gradient(circle at 80% 50%, rgba(242,106,27,0.28), transparent 70%); }
+  .hero-date { color: #f3a06a; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; position: relative; }
+  .hero-title { font-size: 26px; font-weight: 800; margin-top: 5px; position: relative; letter-spacing: -0.4px; }
+  .hero-sub { color: #c7d0df; font-size: 13.5px; margin-top: 7px; position: relative; max-width: 62%; }
+
+  /* Pills */
+  .pill { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+  .pill-green { background: var(--tac-green-soft); color: #157a42; }
+  .pill-orange { background: var(--tac-orange-soft); color: var(--tac-orange-dark); }
+  .pill-blue { background: var(--tac-blue-soft); color: var(--tac-blue-dark); }
+  .pill-amber { background: var(--tac-amber-soft); color: var(--tac-amber); }
+  .pill-red { background: var(--tac-red-soft); color: var(--tac-red); }
+  .pill-slate { background: #eef1f6; color: #4a5568; }
+  .pill-purple { background: #efe7fb; color: #6b3fae; }
+
+  /* Tables */
+  .table-card { background: white; border: 1px solid var(--tac-line); border-radius: 12px; overflow: hidden; }
+  .table-head { padding: 15px 18px; border-bottom: 1px solid var(--tac-line); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead th { text-align: left; padding: 11px 16px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--tac-muted); font-weight: 700; background: #f8fafc; border-bottom: 1px solid var(--tac-line); white-space: nowrap; }
+  td { padding: 12px 16px; border-top: 1px solid #f0f3f8; color: #2b3445; vertical-align: middle; }
+  tbody tr.clickable { cursor: pointer; }
+  tbody tr.clickable:hover { background: #f8fafc; }
+  .row-link { background: none; border: none; font-family: inherit; font-size: inherit; font-weight: 700; color: var(--tac-blue); cursor: pointer; padding: 0; text-align: left; }
+  .row-link:hover { text-decoration: underline; }
+
+  /* Forms */
+  label.field { display: block; }
+  .field-label { font-size: 12px; font-weight: 700; color: var(--tac-ink); margin-bottom: 5px; display: block; }
+  input, select, textarea { font-family: inherit; font-size: 13.5px; padding: 9px 11px; border: 1px solid var(--tac-line); border-radius: 8px; outline: none; width: 100%; background: white; color: var(--tac-ink); }
+  input:focus, select:focus, textarea:focus { border-color: var(--tac-blue); box-shadow: var(--focus); }
+  .check-row { display: flex; align-items: center; gap: 9px; }
+  .check-row input { width: auto; }
+  .ms-group { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; border: 1px solid var(--tac-line); border-radius: 8px; padding: 10px 12px; }
+  .ms-item { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+  .ms-item input { width: auto; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid .full { grid-column: 1 / -1; }
+
+  /* Tabs / chips */
+  .tabs { display: inline-flex; background: white; border: 1px solid var(--tac-line); border-radius: 9px; padding: 4px; gap: 3px; }
+  .tab { padding: 8px 16px; font-size: 13px; font-weight: 700; border-radius: 7px; cursor: pointer; color: var(--tac-muted); border: none; background: transparent; font-family: inherit; }
+  .tab.active { background: var(--tac-ink); color: white; }
+  .chips { display: flex; gap: 7px; flex-wrap: wrap; }
+  .chip { padding: 7px 13px; font-size: 12.5px; font-weight: 700; border-radius: 999px; cursor: pointer; background: white; color: var(--tac-ink); border: 1px solid var(--tac-line); font-family: inherit; }
+  .chip.active { background: var(--tac-blue); color: white; border-color: var(--tac-blue); }
+  .chip:hover:not(.active) { border-color: #c9d2e0; }
+  .seg { display: inline-flex; border: 1px solid var(--tac-line); border-radius: 8px; overflow: hidden; background: #fff; }
+  .seg button { padding: 8px 14px; font-size: 12.5px; font-weight: 700; border: none; background: #fff; color: var(--tac-muted); cursor: pointer; font-family: inherit; border-right: 1px solid var(--tac-line); }
+  .seg button:last-child { border-right: none; }
+  .seg button.active { background: var(--tac-ink); color: #fff; }
+
+  /* Calendar */
+  .cal-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .cal-grid-wrap { overflow-x: auto; }
+  table.cal { border-collapse: collapse; width: 100%; min-width: 760px; table-layout: fixed; }
+  table.cal th { padding: 9px 8px; font-size: 11.5px; text-align: center; background: #f8fafc; border: 1px solid var(--tac-line); color: var(--tac-ink); font-weight: 700; text-transform: none; letter-spacing: 0; }
+  table.cal th.time-col, table.cal td.time-col { width: 64px; }
+  table.cal td { border: 1px solid #eef1f6; vertical-align: top; padding: 3px; height: 52px; }
+  td.time-col { background: #fafbfd; color: var(--tac-muted); font-size: 11px; text-align: right; padding-right: 8px; font-family: ui-monospace, Menlo, monospace; }
+  .cal-event { border-radius: 6px; padding: 5px 7px; margin-bottom: 3px; border-left: 3px solid; cursor: pointer; width: 100%; text-align: left; font-family: inherit; display: block; }
+  .cal-event:hover { filter: brightness(0.97); }
+  .cal-ev-name { font-weight: 700; font-size: 11.5px; line-height: 1.2; }
+  .cal-ev-meta { font-size: 10.5px; opacity: 0.85; margin-top: 1px; }
+  .ev-velocity { background: var(--tac-orange-soft); border-color: var(--tac-orange); color: #9a3d05; }
+  .ev-command { background: var(--tac-blue-soft); border-color: var(--tac-blue); color: var(--tac-blue-dark); }
+  .ev-bullpen { background: #e7f6ee; border-color: var(--tac-green); color: #14663a; }
+  .ev-armcare { background: #fdf0d6; border-color: var(--tac-amber); color: #7a5208; }
+  .ev-youth { background: #efe7fb; border-color: #7b4fc0; color: #5a2f9c; }
+  .ev-mobility { background: #e0f2f4; border-color: #1597a6; color: #0c6470; }
+  .ev-offspeed { background: #fde7ef; border-color: #c83b78; color: #97265a; }
+  .ev-psych { background: #e8edf7; border-color: #4a6fb0; color: #2f4d85; }
+  .ev-rental { background: #eef1f6; border-color: #6b7689; color: #3c4658; }
+  .ev-unavail { background: #f2d9d9; border-color: var(--tac-red); color: #8a2020; background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(210,59,59,0.08) 5px, rgba(210,59,59,0.08) 10px); }
+  .cal-cont { height: 15px; border-left: 3px solid; border-radius: 4px; margin-bottom: 3px; opacity: 0.5; }
+  .warn-box { background: var(--tac-red-soft); border: 1px solid #f3c2c2; border-left: 4px solid var(--tac-red); border-radius: 10px; padding: 12px 14px; color: #8a2020; font-size: 13px; font-weight: 600; display: flex; flex-direction: column; gap: 5px; }
+  .search-results { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1px solid var(--tac-line); border-radius: 10px; box-shadow: 0 12px 32px rgba(20,35,60,0.16); z-index: 60; overflow: hidden; min-width: 260px; }
+  .search-results:empty { display: none; }
+  .sr-item { display: block; width: 100%; text-align: left; border: none; background: #fff; font-family: inherit; padding: 10px 14px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f3f8; color: var(--tac-ink); }
+  .sr-item:last-child { border-bottom: none; }
+  .sr-item:hover { background: #f8fafc; }
+  .sr-kind { font-size: 10px; color: var(--tac-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; margin-right: 8px; }
+  .cat-legend { display: flex; gap: 6px; flex-wrap: wrap; }
+  .legend-item { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--tac-muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* Month picker */
+  .monthpick { position: absolute; top: calc(100% + 6px); right: 0; background: white; border: 1px solid var(--tac-line); border-radius: 12px; box-shadow: 0 12px 32px rgba(20,35,60,0.16); padding: 14px; z-index: 60; width: 280px; }
+  .mp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .mp-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+  .mp-dow { font-size: 10.5px; color: var(--tac-muted); text-align: center; font-weight: 700; padding: 4px 0; }
+  .mp-day { border: none; background: none; font-family: inherit; font-size: 12.5px; padding: 7px 0; border-radius: 7px; cursor: pointer; color: var(--tac-ink); }
+  .mp-day:hover { background: var(--tac-blue-soft); }
+  .mp-day.today { outline: 1px solid var(--tac-orange); }
+  .mp-day.sel { background: var(--tac-blue); color: white; }
+  .mp-day.muted { color: #c2cad6; }
+
+  /* Progress / bars */
+  .bar-track { height: 8px; background: #eef1f6; border-radius: 999px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--tac-orange); border-radius: 999px; }
+  .bar-fill.blue { background: var(--tac-blue); }
+  .vbars { display: flex; align-items: flex-end; gap: 8px; height: 150px; }
+  .vbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; justify-content: flex-end; }
+  .vbar { width: 100%; background: linear-gradient(180deg, var(--tac-orange), var(--tac-orange-dark)); border-radius: 5px 5px 0 0; min-height: 3px; }
+  .vbar.blue { background: linear-gradient(180deg, var(--tac-blue), var(--tac-blue-dark)); }
+  .vbar-lab { font-size: 10.5px; color: var(--tac-muted); font-weight: 600; }
+  .vbar-val { font-size: 11.5px; font-weight: 700; color: var(--tac-ink); }
+
+  .empty { color: #c2cad6; text-align: center; font-size: 12px; padding: 14px 0; }
+  .divider { border-top: 1px solid var(--tac-line); margin: 16px 0; }
+  .kv { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f3f8; font-size: 13.5px; }
+  .kv:last-child { border-bottom: none; }
+  .kv .k { color: var(--tac-muted); }
+  .kv .v { font-weight: 700; color: var(--tac-ink); }
+  .pager { padding: 13px 18px; border-top: 1px solid var(--tac-line); display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: var(--tac-muted); flex-wrap: wrap; gap: 10px; }
+  .pg-btn { padding: 6px 11px; border: 1px solid var(--tac-line); background: white; border-radius: 7px; font-size: 12.5px; cursor: pointer; font-family: inherit; font-weight: 600; }
+  .pg-btn:hover:not(:disabled) { border-color: #c9d2e0; }
+  .pg-btn.active { background: var(--tac-ink); color: white; border-color: var(--tac-ink); }
+  .pg-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .alert-box { background: var(--tac-orange-soft); border: 1px solid #f6cfaf; border-left: 4px solid var(--tac-orange); border-radius: 10px; padding: 14px 16px; display: flex; gap: 10px; align-items: center; color: var(--tac-orange-dark); font-size: 13.5px; font-weight: 600; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--tac-orange); flex-shrink: 0; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(20,35,60,0.45); display: flex; align-items: flex-start; justify-content: center; padding: 48px 16px; z-index: 100; overflow-y: auto; }
+  .modal { background: white; border-radius: 14px; width: 100%; max-width: 540px; box-shadow: 0 24px 60px rgba(20,35,60,0.3); animation: pop 0.14s ease-out; }
+  .modal.wide { max-width: 760px; }
+  @keyframes pop { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-head { padding: 18px 22px; border-bottom: 1px solid var(--tac-line); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .modal-title { font-size: 17px; font-weight: 800; color: var(--tac-ink); }
+  .modal-desc { font-size: 12.5px; color: var(--tac-muted); margin-top: 2px; }
+  .modal-x { border: none; background: #f0f3f8; color: var(--tac-muted); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 17px; flex-shrink: 0; }
+  .modal-x:hover { background: #e4e8ef; color: var(--tac-ink); }
+  .modal-body { padding: 22px; }
+  .modal-foot { padding: 16px 22px; border-top: 1px solid var(--tac-line); display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* Toast */
+  .toast-wrap { position: fixed; bottom: 22px; right: 22px; z-index: 200; display: flex; flex-direction: column; gap: 10px; }
+  .toast { background: var(--tac-ink); color: white; padding: 13px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 600; box-shadow: 0 10px 30px rgba(20,35,60,0.3); display: flex; align-items: center; gap: 10px; animation: slidein 0.18s ease-out; max-width: 360px; }
+  .toast .tdot { width: 9px; height: 9px; border-radius: 50%; background: var(--tac-green); flex-shrink: 0; }
+  @keyframes slidein { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  @media (max-width: 860px) {
+    .sidebar { width: 64px; } .brand-name, .brand-sub, .nav-item span:not(.ico):not(.arrow), .sub-nav, .user-name, .user-role { display: none; }
+    .grid-4, .grid-3 { grid-template-columns: 1fr 1fr; }
+    .search input { width: 150px; }
+  }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="app">
+  <nav class="sidebar" aria-label="Primary">
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">TAC</div>
+      <div>
+        <div class="brand-name">Total Arm Care</div>
+        <div class="brand-sub">Operations · Wharton, NJ</div>
+      </div>
+    </div>
+    <div class="nav" id="nav"></div>
+    <div class="user-box">
+      <div class="avatar" aria-hidden="true">HW</div>
+      <div>
+        <div class="user-name">Henry Warner</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+  </nav>
+  <main class="main" id="main">
+    <div class="topbar">
+      <div>
+        <h1 class="topbar-title" id="page-title">Dashboard</h1>
+        <div class="topbar-sub" id="page-sub">Organization overview</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="search" role="search">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <label for="global-search" class="sr-only">Search the portal</label>
+          <input type="text" id="global-search" placeholder="Search customers, services, pages…" data-action="global-search" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="search-results" />
+          <div class="search-results" id="search-results" role="listbox"></div>
+        </div>
+        <button class="btn btn-secondary" data-action="copy-booking-link">🔗 Copy Booking Link</button>
+        <button class="btn btn-primary" data-action="new-booking">+ New Booking</button>
+      </div>
+    </div>
+    <div class="content" id="content" tabindex="-1"></div>
+  </main>
+</div>
+<div id="modal-root"></div>
+<div class="toast-wrap" id="toast-root" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   TOTAL ARM CARE — INTERNAL OPS PORTAL (prototype v2)
+   Single-file. Every control wired. Shared in-session state:
+   bookings -> calendar events + transactions -> reports revenue.
+   ============================================================ */
+
+/* ---------- date helpers ---------- */
+const TODAY = new Date(2026, 5, 18); // Thu Jun 18 2026 (prototype "now")
+const MS_DAY = 86400000;
+function startOfWeek(d){ const x = new Date(d); const wd = (x.getDay()+6)%7; x.setDate(x.getDate()-wd); x.setHours(0,0,0,0); return x; }
+function addDays(d,n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function fmtDate(d){ return d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}); }
+function fmtDateShort(d){ return d.toLocaleDateString("en-US",{month:"short",day:"numeric"}); }
+function parseISO(s){ const [y,m,dd]=s.split("-").map(Number); return new Date(y,m-1,dd); }
+function dayName(d){ return d.toLocaleDateString("en-US",{weekday:"long"}); }
+const DOW = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+function money(n){ return "$"+Number(n||0).toLocaleString(); }
+
+/* ---------- time slots (8AM–8PM hourly) ---------- */
+const SLOTS = [];
+for(let h=8; h<=20; h++){ const ap=h<12?"AM":"PM"; const hh=h%12===0?12:h%12; SLOTS.push(hh+":00 "+ap); }
+function slotLabel(i){ return SLOTS[i] || ""; }
+
+/* ---------- core data ---------- */
+const ROOMS = ["Mound 1","Mound 2","Cage 1","Cage 2","Turf Bay","Weight Room","Golf Den","Assessment Lab"];
+
+const COACHES = [
+  {id:"c1", name:"Tom Drown", role:"Founder & Dir. Player Development", specialty:"Velocity / Command", email:"tom@totalarmcare.com", phone:"(908) 555-0101", status:"Active"},
+  {id:"c2", name:"Todd Burdette", role:"Director of Player Operations", specialty:"On-Floor Pitching", email:"todd@totalarmcare.com", phone:"(908) 555-0102", status:"Active"},
+  {id:"c3", name:"Collin Kiernan", role:"Director of Remote & On-Floor", specialty:"Remote / Video Review", email:"collin@totalarmcare.com", phone:"(908) 555-0103", status:"Active"},
+  {id:"c4", name:"Mike Lembo", role:"On-Floor Pitching Coordinator", specialty:"Mechanics / Arm Care", email:"mike@totalarmcare.com", phone:"(908) 555-0104", status:"Active"},
+  {id:"c5", name:"Brad Hedden", role:"On-Floor Pitching Coordinator", specialty:"S&C / Mobility", email:"brad@totalarmcare.com", phone:"(908) 555-0105", status:"Active"},
+  {id:"c6", name:"Dustin Arena", role:"Director of Facility Operations", specialty:"Operations / Golf Den", email:"dustin@totalarmcare.com", phone:"(908) 555-0106", status:"Active"},
+  {id:"c7", name:"Ryan Salas", role:"Pitching Coach", specialty:"Off-Speed / Command", email:"ryan@totalarmcare.com", phone:"(908) 555-0107", status:"Active"},
+  {id:"c8", name:"Marcus Webb", role:"Youth Development Coach", specialty:"Youth Training", email:"marcus@totalarmcare.com", phone:"(908) 555-0108", status:"Active"},
+  {id:"c9", name:"Joe Pagano", role:"Strength Coach", specialty:"S&C / Recovery", email:"joe@totalarmcare.com", phone:"(908) 555-0109", status:"Active"},
+  {id:"c10", name:"Dr. Alyssa Green", role:"Sport Psychologist", specialty:"Mental Performance", email:"alyssa@totalarmcare.com", phone:"(908) 555-0110", status:"Active"},
+];
+function coachName(id){ const c = COACHES.find(c=>c.id===id); return c?c.name:id; }
+
+/* category keys map to event color classes + the 8 calendar columns */
+const CATEGORIES = [
+  {key:"velocity", label:"Velocity", cls:"ev-velocity"},
+  {key:"command", label:"Command", cls:"ev-command"},
+  {key:"bullpen", label:"Bullpen", cls:"ev-bullpen"},
+  {key:"armcare", label:"Arm Care", cls:"ev-armcare"},
+  {key:"youth", label:"Youth", cls:"ev-youth"},
+  {key:"mobility", label:"Mobility", cls:"ev-mobility"},
+  {key:"offspeed", label:"Off-Speed", cls:"ev-offspeed"},
+  {key:"psych", label:"Sport Psych", cls:"ev-psych"},
+];
+function catCls(key){ const c = CATEGORIES.find(c=>c.key===key); return c?c.cls:"ev-rental"; }
+function catLabel(key){ const c = CATEGORIES.find(c=>c.key===key); return c?c.label:key; }
+
+/* ---------- services ---------- */
+let RENTALS = [
+  {id:"r1", name:"Golf Simulator Den", price:65, unit:"per hour", visibility:"Public", availability:"7 days/week · 8AM–10PM", room:"Golf Den"},
+];
+let LESSONS = [
+  {id:"l1", name:"Private Pitching Lesson", price:120, duration:"60 min", instructor:"c1", category:"velocity"},
+  {id:"l2", name:"Youth Lesson", price:75, duration:"45 min", instructor:"c8", category:"youth"},
+  {id:"l3", name:"Mechanics Evaluation", price:200, duration:"90 min", instructor:"c4", category:"command"},
+  {id:"l4", name:"Remote Video Review", price:95, duration:"45 min", instructor:"c3", category:"command"},
+  {id:"l5", name:"Strength & Mobility Session", price:85, duration:"60 min", instructor:"c5", category:"mobility"},
+];
+let CLASSES = [
+  {id:"cl1", name:"Velocity Group (HS)", visibility:"Public", status:"Active", dates:"Jun 2 – Aug 8, 2026", registration:"Open", price:55, instructor:"c1", category:"velocity"},
+  {id:"cl2", name:"Youth Skill Builder", visibility:"Public", status:"Active", dates:"Jun 9 – Jul 28, 2026", registration:"Open", price:35, instructor:"c8", category:"youth"},
+  {id:"cl3", name:"Arm Care Class", visibility:"Members", status:"Active", dates:"Ongoing", registration:"Open", price:40, instructor:"c5", category:"armcare"},
+  {id:"cl4", name:"Off-Speed Lab", visibility:"Public", status:"Active", dates:"Jul 1 – Jul 22, 2026", registration:"Closed", price:60, instructor:"c7", category:"offspeed"},
+  {id:"cl5", name:"Mobility Reset", visibility:"Members", status:"Inactive", dates:"May 1 – May 29, 2026", registration:"Closed", price:40, instructor:"c9", category:"mobility"},
+  {id:"cl6", name:"Mental Performance Group", visibility:"Public", status:"Active", dates:"Jun 15 – Aug 3, 2026", registration:"Open", price:50, instructor:"c10", category:"psych"},
+];
+let MEMBERSHIPS = [
+  {id:"m1", name:"Unlimited Training", price:399, frequency:"Monthly", members:42, credits:0, unlimited:true, description:"Unlimited floor time and private lessons for serious high-school & up athletes.", discount:"10% off retail products", notes:"Includes unlimited cage & mound access during open hours."},
+  {id:"m2", name:"Youth All-Access", price:249, frequency:"Monthly", members:67, credits:8, unlimited:false, description:"Best for youth athletes (ages 8–13). Includes monthly lesson credits.", discount:"Sibling discount 10%", notes:"8 lesson credits per month, resets on billing date."},
+  {id:"m3", name:"Pro Performance", price:899, frequency:"Monthly", members:14, credits:0, unlimited:true, description:"All-access for collegiate & professional athletes, including assessments.", discount:"15% off products + free quarterly assessment", notes:"Priority scheduling and unlimited lessons."},
+  {id:"m4", name:"Remote Plan", price:149, frequency:"Monthly", members:31, credits:4, unlimited:false, description:"Remote video reviews and custom programming for out-of-area athletes.", discount:"—", notes:"4 remote review credits per month."},
+];
+let PACKAGES = [
+  {id:"p1", name:"5-Pack Pitching Lessons", price:550, note:"Save $50 vs single"},
+  {id:"p2", name:"10-Pack Pitching Lessons", price:1050, note:"Save $150 vs single"},
+  {id:"p3", name:"Velocity Bootcamp (6 wk)", price:600, note:"18 sessions"},
+  {id:"p4", name:"Youth Starter Bundle", price:300, note:"4 lessons + assessment"},
+  {id:"p5", name:"Sport Psychology — 4 Session", price:480, note:"Mental performance"},
+  {id:"p6", name:"Sport Psychology — 8 Session", price:880, note:"Mental performance"},
+];
+
+/* ---------- customers ---------- */
+let CUSTOMERS = [
+  {id:"u1", name:"Marcus Rodriguez", paid:"2026-06-15", email:"maria.r@email.com", phone:"(908) 555-0142", childAge:17, membership:"Unlimited Training", waiver:true, since:"2024-09-01", spent:3840},
+  {id:"u2", name:"Tyler O'Brien", paid:"2026-06-11", email:"k.obrien@email.com", phone:"(732) 555-0188", childAge:14, membership:"Youth All-Access", waiver:true, since:"2025-01-12", spent:1990},
+  {id:"u3", name:"Jaden Patel", paid:"2026-06-10", email:"r.patel@email.com", phone:"(908) 555-0167", childAge:21, membership:"Pro Performance", waiver:true, since:"2023-06-04", spent:9870},
+  {id:"u4", name:"Ethan Caldwell", paid:"2026-06-09", email:"ccaldwell@email.com", phone:"(201) 555-0124", childAge:23, membership:"Pro Performance", waiver:true, since:"2023-02-18", spent:11200},
+  {id:"u5", name:"Brayden Kim", paid:"2026-06-08", email:"j.kim@email.com", phone:"(732) 555-0151", childAge:12, membership:"Youth All-Access", waiver:false, since:"2026-02-01", spent:560},
+  {id:"u6", name:"Cole Henderson", paid:"2026-06-07", email:"d.henderson@email.com", phone:"(908) 555-0193", childAge:19, membership:"Remote Plan", waiver:true, since:"2025-08-22", spent:1490},
+  {id:"u7", name:"Lucas Romano", paid:"2026-06-06", email:"a.romano@email.com", phone:"(973) 555-0177", childAge:16, membership:"Unlimited Training", waiver:true, since:"2024-11-30", spent:2870},
+  {id:"u8", name:"Noah Vasquez", paid:"2026-06-04", email:"p.vasquez@email.com", phone:"(732) 555-0145", childAge:11, membership:"Youth All-Access", waiver:false, since:"2026-03-15", spent:300},
+  {id:"u9", name:"Aiden Murphy", paid:"2026-06-02", email:"l.murphy@email.com", phone:"(201) 555-0118", childAge:18, membership:"Unlimited Training", waiver:true, since:"2024-05-09", spent:4120},
+  {id:"u10", name:"Mason Brooks", paid:"2026-06-01", email:"j.brooks@email.com", phone:"(908) 555-0136", childAge:25, membership:"Pro Performance", waiver:true, since:"2022-10-01", spent:14300},
+  {id:"u11", name:"Connor Walsh", paid:"2026-05-30", email:"c.walsh@email.com", phone:"(973) 555-0150", childAge:15, membership:"Unlimited Training", waiver:true, since:"2025-04-21", spent:1820},
+  {id:"u12", name:"Ryan Delgado", paid:"2026-05-29", email:"r.delgado@email.com", phone:"(908) 555-0162", childAge:20, membership:"Pro Performance", waiver:true, since:"2024-01-08", spent:6650},
+];
+function custById(id){ return CUSTOMERS.find(c=>c.id===id); }
+
+/* ---------- marketing ---------- */
+let COUPONS = [
+  {id:"co1", name:"Sibling Discount", code:"SIBLING10", status:"Active", uses:38, discount:"10% off"},
+  {id:"co2", name:"In-Season Discount", code:"INSEASON15", status:"Active", uses:52, discount:"15% off"},
+  {id:"co3", name:"Summer Kickoff", code:"SUMMER26", status:"Active", uses:42, discount:"15% off"},
+  {id:"co4", name:"New Member Welcome", code:"WELCOME50", status:"Active", uses:118, discount:"$50 off"},
+  {id:"co5", name:"Referral Reward", code:"REFER25", status:"Active", uses:31, discount:"$25 off"},
+  {id:"co6", name:"Spring Break Special", code:"SPRING26", status:"Expired", uses:67, discount:"20% off"},
+];
+let BLASTS = [
+  {id:"b1", subject:"Summer Velocity Camp — Registration Open", sent:"2026-06-10", delivered:1240, opened:486},
+  {id:"b2", subject:"Youth Camp Spots Filling Fast", sent:"2026-06-03", delivered:980, opened:412},
+  {id:"b3", subject:"Coach Tom's Mid-Season Tips", sent:"2026-05-22", delivered:1310, opened:523},
+  {id:"b4", subject:"Memorial Day Hours Update", sent:"2026-05-20", delivered:1310, opened:786},
+  {id:"b5", subject:"New Pro Performance Membership", sent:"2026-05-08", delivered:1240, opened:387},
+  {id:"b6", subject:"Spring Showcase Recap & Photos", sent:"2026-04-30", delivered:1180, opened:614},
+];
+
+/* ---------- calendar events (seeded for current week) + unavailability ---------- */
+let EVT_SEQ = 1;
+function newEvtId(){ return "e"+(EVT_SEQ++); }
+const WEEK0 = startOfWeek(TODAY);
+let EVENTS = [];
+let UNAVAIL = [];
+(function seed(){
+  // [dayOffset, slot, room, coach, service, type(class/lesson/rental), customer, category, len]
+  const s = [
+    [0,0,"Golf Den","c6","Golf Den Rental","rental","Walk-in","rental",1],
+    [0,3,"Mound 1","c1","Velocity Group (HS)","class","Velocity Group","velocity",1],
+    [0,8,"Cage 1","c4","Mechanics Evaluation","lesson","Marcus Rodriguez","command",2],
+    [0,5,"Assessment Lab","c10","Mental Performance Group","class","Psych Group","psych",1],
+    [1,1,"Mound 2","c1","Private Pitching Lesson","lesson","Jaden Patel","command",1],
+    [1,9,"Turf Bay","c8","Youth Skill Builder","class","Youth Group","youth",1],
+    [1,2,"Cage 2","c7","Off-Speed Lab","class","Off-Speed Group","offspeed",1],
+    [2,4,"Weight Room","c5","Strength & Mobility Session","lesson","Group Class","mobility",1],
+    [2,8,"Mound 1","c1","Velocity Group (HS)","class","Velocity Group","velocity",1],
+    [2,0,"Golf Den","c6","Golf Den Rental","rental","Chris Caldwell","rental",2],
+    [3,3,"Mound 1","c1","Private Pitching Lesson","lesson","Jaden Patel","velocity",1],
+    [3,9,"Turf Bay","c8","Youth Skill Builder","class","Youth Group","youth",1],
+    [3,6,"Weight Room","c9","Arm Care Class","class","Arm Care Group","armcare",1],
+    [4,2,"Assessment Lab","c3","Remote Video Review","lesson","Cole Henderson","command",1],
+    [4,6,"Mound 2","c4","Private Pitching Lesson","lesson","Connor Walsh","velocity",1],
+    [4,4,"Golf Den","c6","Golf Den Rental","rental","Walk-in","rental",1],
+    [5,1,"Weight Room","c5","Arm Care Class","class","Arm Care Group","armcare",1],
+    [5,2,"Mound 1","c4","Private Pitching Lesson","lesson","Marcus Rodriguez","bullpen",1],
+    [5,5,"Mound 2","c1","Velocity Group (HS)","class","Velocity Group","velocity",1],
+    [5,0,"Golf Den","c6","Golf Den Rental","rental","Brooks Family","rental",2],
+  ];
+  s.forEach(r=>{
+    EVENTS.push({id:newEvtId(), date:iso(addDays(WEEK0,r[0])), slot:r[1], len:r[8], room:r[2], coach:r[3], service:r[4], type:r[5], customer:r[6], category:r[7], revenue:revenueFor(r[4],r[5])});
+  });
+  UNAVAIL.push({id:newEvtId(), date:iso(addDays(WEEK0,2)), slot:10, len:2, coach:"c1", reason:"Recruiting trip"});
+  UNAVAIL.push({id:newEvtId(), date:iso(addDays(WEEK0,4)), slot:0, len:2, coach:"c10", reason:"Off-site sessions"});
+})();
+function revenueFor(service, type){
+  const l = LESSONS.find(x=>x.name===service); if(l) return l.price;
+  const c = CLASSES.find(x=>x.name===service); if(c) return c.price;
+  if(type==="rental") return 65;
+  return 0;
+}
+
+/* ---------- transactions (revenue ledger; bookings append here) ---------- */
+let TXN_SEQ = 10428;
+function newTxnId(){ return "TXN-"+(TXN_SEQ++); }
+let TRANSACTIONS = [
+  {id:"TXN-10427", date:"2026-06-16", customer:"Maria Rodriguez", staff:"c1", service:"Private Pitching Lesson", room:"Mound 1", type:"lesson", amount:120, start:"4:00 PM", end:"5:00 PM"},
+  {id:"TXN-10426", date:"2026-06-16", customer:"Chris Caldwell", staff:"System", service:"Pro Performance Membership", room:"—", type:"membership", amount:899, start:"—", end:"—"},
+  {id:"TXN-10425", date:"2026-06-16", customer:"David Henderson", staff:"c3", service:"Remote Video Review", room:"Assessment Lab", type:"lesson", amount:95, start:"2:00 PM", end:"2:45 PM"},
+  {id:"TXN-10424", date:"2026-06-15", customer:"Ken O'Brien", staff:"c8", service:"Youth Lesson", room:"Turf Bay", type:"lesson", amount:75, start:"5:00 PM", end:"5:45 PM"},
+  {id:"TXN-10423", date:"2026-06-15", customer:"Anna Romano", staff:"c1", service:"5-Pack Pitching Lessons", room:"—", type:"package", amount:550, start:"—", end:"—"},
+  {id:"TXN-10422", date:"2026-06-15", customer:"Patel Family", staff:"c1", service:"Velocity Group (HS)", room:"Mound 1", type:"class", amount:55, start:"11:00 AM", end:"12:00 PM"},
+  {id:"TXN-10421", date:"2026-06-14", customer:"Linda Murphy", staff:"c4", service:"Mechanics Evaluation", room:"Cage 1", type:"lesson", amount:200, start:"1:00 PM", end:"2:30 PM"},
+  {id:"TXN-10420", date:"2026-06-14", customer:"Brooks Family", staff:"c5", service:"Strength & Mobility Session", room:"Weight Room", type:"lesson", amount:85, start:"10:00 AM", end:"11:00 AM"},
+  {id:"TXN-10419", date:"2026-06-13", customer:"Pete Vasquez", staff:"c8", service:"Youth Lesson", room:"Turf Bay", type:"lesson", amount:75, start:"3:00 PM", end:"3:45 PM"},
+  {id:"TXN-10418", date:"2026-06-13", customer:"Jennifer Kim", staff:"System", service:"Youth Starter Bundle", room:"—", type:"package", amount:300, start:"—", end:"—"},
+  {id:"TXN-10417", date:"2026-06-12", customer:"Maria Rodriguez", staff:"System", service:"Unlimited Training Membership", room:"—", type:"membership", amount:399, start:"—", end:"—"},
+  {id:"TXN-10416", date:"2026-06-12", customer:"Walk-in", staff:"c6", service:"Golf Den Rental", room:"Golf Den", type:"rental", amount:130, start:"6:00 PM", end:"8:00 PM"},
+  {id:"TXN-10415", date:"2026-06-11", customer:"Ken O'Brien", staff:"System", service:"Youth All-Access Membership", room:"—", type:"membership", amount:249, start:"—", end:"—"},
+  {id:"TXN-10414", date:"2026-06-11", customer:"Walk-in", staff:"c7", service:"Off-Speed Lab", room:"Cage 2", type:"class", amount:60, start:"10:00 AM", end:"11:00 AM"},
+  {id:"TXN-10413", date:"2026-06-10", customer:"Cole Henderson", staff:"c3", service:"Remote Video Review", room:"Assessment Lab", type:"lesson", amount:95, start:"2:00 PM", end:"2:45 PM"},
+  {id:"TXN-10412", date:"2026-06-10", customer:"Patel Family", staff:"c1", service:"10-Pack Pitching Lessons", room:"—", type:"package", amount:1050, start:"—", end:"—"},
+  {id:"TXN-10411", date:"2026-06-09", customer:"Chris Caldwell", staff:"System", service:"Pro Performance Membership", room:"—", type:"membership", amount:899, start:"—", end:"—"},
+  {id:"TXN-10410", date:"2026-06-09", customer:"Jennifer Kim", staff:"c8", service:"Youth Lesson", room:"Turf Bay", type:"lesson", amount:75, start:"4:00 PM", end:"4:45 PM"},
+  {id:"TXN-10409", date:"2026-06-08", customer:"Walk-in", staff:"c6", service:"Golf Den Rental", room:"Golf Den", type:"rental", amount:65, start:"7:00 PM", end:"8:00 PM"},
+  {id:"TXN-10408", date:"2026-06-07", customer:"Aiden Murphy", staff:"c1", service:"Private Pitching Lesson", room:"Mound 2", type:"lesson", amount:120, start:"9:00 AM", end:"10:00 AM"},
+];
+
+/* ============================================================
+   NAV
+   ============================================================ */
+const NAV = [
+  {key:"dashboard", label:"Dashboard", ico:"▦"},
+  {key:"services", label:"Services", ico:"◷", children:[
+    {key:"svc-rentals", label:"Rentals"},
+    {key:"svc-lessons", label:"Lessons"},
+    {key:"svc-classes", label:"Classes"},
+    {key:"svc-memberships", label:"Memberships"},
+    {key:"svc-packages", label:"Packages"},
+  ]},
+  {key:"calendar", label:"Calendar", ico:"▤"},
+  {key:"availability", label:"Availability", ico:"◔"},
+  {key:"customers", label:"Customers", ico:"◍"},
+  {key:"marketing", label:"Marketing", ico:"◆", children:[
+    {key:"mkt-coupons", label:"Coupons"},
+    {key:"mkt-email", label:"Email Blasts"},
+  ]},
+  {key:"reports", label:"Reports", ico:"▥"},
+];
+const TITLES = {
+  dashboard:["Dashboard","Organization overview"],
+  services:["Services","Lessons, classes, memberships, packages & rentals"],
+  "svc-rentals":["Services · Rentals","Bookable facility rentals"],
+  "svc-lessons":["Services · Lessons","Private lesson catalog"],
+  "svc-classes":["Services · Classes","Group class catalog"],
+  "svc-memberships":["Services · Memberships","Recurring membership plans"],
+  "svc-packages":["Services · Packages","Discount bundles & programs"],
+  calendar:["Calendar","Room & staff scheduling"],
+  availability:["Availability","Coach availability by day"],
+  customers:["Customers","Everyone who has purchased a service"],
+  marketing:["Marketing","Coupons and email campaigns"],
+  "mkt-coupons":["Marketing · Coupons","Promo codes and usage"],
+  "mkt-email":["Marketing · Email Blasts","Email campaign performance"],
+  reports:["Reports","Bookings, occupancy, customers & attendance"],
+};
+const SVC_DEFAULT = "svc-rentals";
+const MKT_DEFAULT = "mkt-coupons";
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  page: "dashboard",
+  open: { services:false, marketing:false },
+  svcSearch: { "svc-rentals":"", "svc-lessons":"", "svc-classes":"", "svc-memberships":"", "svc-packages":"" },
+  cal: { mode:"rooms", view:"day", date:iso(TODAY), pickerOpen:false, pickerMonth:TODAY.getMonth(), pickerYear:TODAY.getFullYear() },
+  avail: { view:"day", date:iso(TODAY), pickerOpen:false, pickerMonth:TODAY.getMonth(), pickerYear:TODAY.getFullYear() },
+  cust: { q:"" },
+  custView: null,
+  custTab: "profile",
+  reportTab: "bookings",
+  reportsPage: 1,
+  filters: {
+    bookings: { range:"month", customer:"", staff:"", serviceType:"", service:"", room:"" },
+    occupancy: { range:"month" },
+    customers: { staff:"", serviceType:"", service:"", range:"month" },
+    attendance: { customer:"", serviceType:"", service:"", range:"month" },
+  },
+  applied: {
+    bookings: { range:"month", customer:"", staff:"", serviceType:"", service:"", room:"" },
+    customers: { staff:"", serviceType:"", service:"", range:"month" },
+    attendance: { customer:"", serviceType:"", service:"", range:"month" },
+  },
+};
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function pill(text,color){ return `<span class="pill pill-${color}">${esc(text)}</span>`; }
+function statCard(label,value,sub,cls){ return `<div class="stat-card ${cls&&cls.blue?"blue":""}"><div class="stat-label">${esc(label)}</div><div class="stat-value">${esc(value)}</div>${sub?`<div class="stat-sub ${cls&&cls.dir?cls.dir:""}">${esc(sub)}</div>`:""}</div>`; }
+
+/* ---------- toast ---------- */
+function toast(msg){
+  const root = document.getElementById("toast-root");
+  const t = document.createElement("div");
+  t.className = "toast"; t.innerHTML = `<span class="tdot" aria-hidden="true"></span><span>${esc(msg)}</span>`;
+  root.appendChild(t);
+  setTimeout(()=>{ t.style.transition="opacity .3s"; t.style.opacity="0"; setTimeout(()=>t.remove(),300); }, 2600);
+}
+
+/* ---------- modal ---------- */
+let modalSubmitHandler = null;
+function closeModal(){ document.getElementById("modal-root").innerHTML=""; modalSubmitHandler=null; }
+function openModal(opts){
+  // opts: {title, desc, fields:[{key,label,type,value,options,required,placeholder,half}], submitLabel, onSubmit, wide, extraFootHTML}
+  modalSubmitHandler = opts.onSubmit || null;
+  const msKeys = (opts.fields||[]).filter(f=>f.type==="multiselect").map(f=>f.key);
+  const fields = (opts.fields||[]).map(f=>{
+    const id = "fld-"+f.key;
+    let control;
+    if(f.type==="select"){
+      control = `<select id="${id}" name="${f.key}" ${f.required?"required":""}>`+
+        (f.options||[]).map(o=>{ const val=typeof o==="object"?o.value:o; const lab=typeof o==="object"?o.label:o; return `<option value="${esc(val)}" ${String(f.value)===String(val)?"selected":""}>${esc(lab)}</option>`; }).join("")+`</select>`;
+    } else if(f.type==="multiselect"){
+      const vals = (f.value||[]).map(String);
+      control = `<div class="ms-group">`+(f.options||[]).map(o=>{ const val=typeof o==="object"?o.value:o; const lab=typeof o==="object"?o.label:o; return `<label class="ms-item"><input type="checkbox" data-ms="1" name="${f.key}" value="${esc(val)}" ${vals.includes(String(val))?"checked":""}/> <span>${esc(lab)}</span></label>`; }).join("")+`</div>`;
+    } else if(f.type==="textarea"){
+      control = `<textarea id="${id}" name="${f.key}" rows="3" placeholder="${esc(f.placeholder||"")}">${esc(f.value||"")}</textarea>`;
+    } else if(f.type==="checkbox"){
+      return `<label class="field full check-row"><input type="checkbox" id="${id}" name="${f.key}" ${f.value?"checked":""}/> <span class="field-label" style="margin:0;">${esc(f.label)}</span></label>`;
+    } else {
+      control = `<input type="${f.type||"text"}" id="${id}" name="${f.key}" value="${esc(f.value==null?"":f.value)}" placeholder="${esc(f.placeholder||"")}" ${f.required?"required":""} ${f.type==="number"?'step="any"':''}/>`;
+    }
+    return `<label class="field ${f.half?"":"full"}"><span class="field-label">${esc(f.label)}${f.required?' <span style="color:var(--tac-red)">*</span>':""}</span>${control}</label>`;
+  }).join("");
+  document.getElementById("modal-root").innerHTML = `
+    <div class="modal-overlay" data-action="overlay-close">
+      <div class="modal ${opts.wide?"wide":""}" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title" id="modal-title">${esc(opts.title||"")}</div>
+            ${opts.desc?`<div class="modal-desc">${esc(opts.desc)}</div>`:""}
+          </div>
+          <button class="modal-x" data-action="modal-close" aria-label="Close dialog">✕</button>
+        </div>
+        <form id="modal-form">
+          <div class="modal-body">
+            ${opts.bodyHTML!=null ? opts.bodyHTML : `<div class="form-grid">${fields}</div>`}
+          </div>
+          <div class="modal-foot">
+            ${opts.extraFootHTML||""}
+            ${opts.onSubmit?`<button type="button" class="btn btn-secondary" data-action="modal-close">Cancel</button><button type="submit" class="btn btn-primary">${esc(opts.submitLabel||"Save")}</button>`:`<button type="button" class="btn btn-primary" data-action="modal-close">Close</button>`}
+          </div>
+        </form>
+      </div>
+    </div>`;
+  const form = document.getElementById("modal-form");
+  form.addEventListener("submit", e=>{
+    e.preventDefault();
+    if(!modalSubmitHandler){ closeModal(); return; }
+    const data = {};
+    new FormData(form).forEach((v,k)=>{ if(!msKeys.includes(k)) data[k]=v; });
+    form.querySelectorAll('input[type="checkbox"]:not([data-ms])').forEach(cb=>{ data[cb.name]=cb.checked; });
+    msKeys.forEach(k=>{ data[k]=[...form.querySelectorAll('input[data-ms][name="'+k+'"]:checked')].map(c=>c.value); });
+    modalSubmitHandler(data);
+  });
+  // focus first field
+  const first = form.querySelector("input,select,textarea,button");
+  if(first) setTimeout(()=>first.focus(),30);
+}
+function infoModal(title, bodyHTML, footHTML){
+  openModal({ title, bodyHTML, onSubmit:null, extraFootHTML:footHTML||"" });
+}
+
+/* esc key closes modal */
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ const m=document.querySelector(".modal-overlay"); if(m) closeModal(); else if(state.cal.pickerOpen||state.avail.pickerOpen){ state.cal.pickerOpen=false; state.avail.pickerOpen=false; render(); } } });
+
+/* ============================================================
+   RENDER NAV + ROUTER
+   ============================================================ */
+function isActive(key){
+  if(state.page===key) return true;
+  if(key==="services" && state.page.startsWith("svc-")) return true;
+  if(key==="marketing" && state.page.startsWith("mkt-")) return true;
+  return false;
+}
+function renderNav(){
+  return NAV.map(item=>{
+    const has = !!item.children;
+    const expanded = has && (state.open[item.key] || isActive(item.key));
+    const active = isActive(item.key) && !has || (!has && state.page===item.key);
+    let html = `<div class="nav-group">
+      <button class="nav-item ${isActive(item.key)&&!has?"active":""} ${has&&active?"":""} ${has&&expanded?"expanded":""} ${(!has&&state.page===item.key)?"active":""}" data-action="nav" data-key="${item.key}" title="${esc(item.label)}" ${has?`aria-expanded="${expanded}"`:""} ${state.page===item.key?'aria-current="page"':""}>
+        <span class="ico" aria-hidden="true">${item.ico}</span><span>${esc(item.label)}</span>${has?`<span class="arrow" aria-hidden="true">›</span>`:""}
+      </button>`;
+    if(has){
+      html += `<div class="sub-nav ${expanded?"open":""}">`+
+        item.children.map(c=>`<button class="sub-item ${state.page===c.key?"active":""}" data-action="nav" data-key="${c.key}" ${state.page===c.key?'aria-current="page"':""}>${esc(c.label)}</button>`).join("")+
+        `</div>`;
+    }
+    html += `</div>`;
+    return html;
+  }).join("");
+}
+function renderPage(){
+  const p = state.page;
+  if(p==="dashboard") return pageDashboard();
+  if(p==="services"||p==="svc-rentals") return pageRentals();
+  if(p==="svc-lessons") return pageLessons();
+  if(p==="svc-classes") return pageClasses();
+  if(p==="svc-memberships") return pageMemberships();
+  if(p==="svc-packages") return pagePackages();
+  if(p==="calendar") return pageCalendar();
+  if(p==="availability") return pageAvailability();
+  if(p==="customers") return state.custView ? pageCustomerDetail() : pageCustomers();
+  if(p==="marketing"||p==="mkt-coupons") return pageCoupons();
+  if(p==="mkt-email") return pageEmailBlasts();
+  if(p==="reports") return pageReports();
+  return pageDashboard();
+}
+function render(){
+  document.getElementById("nav").innerHTML = renderNav();
+  let titleKey = state.page;
+  const t = TITLES[titleKey] || ["",""];
+  document.getElementById("page-title").textContent = t[0];
+  document.getElementById("page-sub").textContent = t[1];
+  document.getElementById("content").innerHTML = renderPage();
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function navTo(key){
+  const parent = NAV.find(n=>n.children && n.children.some(c=>c.key===key));
+  if(parent) state.open[parent.key] = true;
+  const item = NAV.find(n=>n.key===key);
+  if(item && item.children){ // clicked a parent: toggle + go to default child
+    state.open[key] = !state.open[key];
+    key = key==="services" ? SVC_DEFAULT : key==="marketing" ? MKT_DEFAULT : key;
+  }
+  if(state.page!=="customers") state.custView=null;
+  if(key!=="customers") state.custView=null;
+  state.page = key;
+  const sb=document.getElementById("search-results"); if(sb) sb.innerHTML="";
+  document.getElementById("content").scrollTop = 0;
+  render();
+}
+
+/* ============================================================
+   GLOBAL ACTION DISPATCH  (every control routes through here)
+   ============================================================ */
+document.addEventListener("click", e=>{
+  const el = e.target.closest("[data-action]");
+  if(!el) return;
+  const a = el.dataset.action;
+  if(a==="overlay-close"){ if(e.target===el) closeModal(); return; }
+  if(handleAction[a]){ e.preventDefault(); handleAction[a](el, e); }
+});
+document.addEventListener("input", e=>{
+  const el = e.target.closest("[data-action]"); if(!el) return;
+  const a = el.dataset.action;
+  if(a==="global-search"){ renderSearchResults(el.value); return; }
+  if(a==="svc-search"){ state.svcSearch[state.page==="services"?"svc-rentals":state.page]=el.value; rerenderContent(); restoreFocus(el.id, el.selectionStart); }
+  if(a==="cust-search"){ state.cust.q=el.value; rerenderContent(); restoreFocus(el.id, el.selectionStart); }
+});
+document.addEventListener("change", e=>{
+  const el = e.target.closest("[data-action]"); if(!el) return;
+  const a = el.dataset.action;
+  if(handleAction[a]) handleAction[a](el, e);
+});
+function rerenderContent(){ document.getElementById("content").innerHTML = renderPage(); }
+function restoreFocus(id, pos){ const n=document.getElementById(id); if(n){ n.focus(); if(pos!=null && n.setSelectionRange){ try{n.setSelectionRange(pos,pos);}catch(_){} } } }
+
+/* handleAction map is populated below (page modules append to it) */
+const handleAction = {};
+handleAction["nav"] = el => navTo(el.dataset.key);
+handleAction["modal-close"] = () => closeModal();
+handleAction["global-search"] = () => {};
+handleAction["new-booking"] = () => openBookingModal();
+handleAction["copy-booking-link"] = () => {
+  const url = "https://book.totalarmcare.com/wharton";
+  try { if(navigator.clipboard){ navigator.clipboard.writeText(url).then(()=>toast("Booking link copied — "+url), ()=>toast("Booking link: "+url)); return; } } catch(_){}
+  toast("Booking link: "+url);
+};
+function renderSearchResults(q){
+  const box = document.getElementById("search-results"); if(!box) return;
+  const gs = document.getElementById("global-search");
+  q = (q||"").trim().toLowerCase();
+  if(q.length<2){ box.innerHTML=""; if(gs) gs.setAttribute("aria-expanded","false"); return; }
+  const res = [];
+  CUSTOMERS.forEach(c=>{ if((c.name+" "+c.email+" "+c.phone).toLowerCase().includes(q)) res.push({kind:"Customer",label:c.name,act:"cust",id:c.id}); });
+  [["svc-lessons",LESSONS],["svc-classes",CLASSES],["svc-memberships",MEMBERSHIPS],["svc-packages",PACKAGES],["svc-rentals",RENTALS]].forEach(([pg,arr])=>arr.forEach(s=>{ if(s.name.toLowerCase().includes(q)) res.push({kind:"Service",label:s.name,act:"page",key:pg}); }));
+  NAV.forEach(n=>{ if(n.label.toLowerCase().includes(q)) res.push({kind:"Page",label:n.label,act:"page",key:n.key}); (n.children||[]).forEach(ch=>{ if(ch.label.toLowerCase().includes(q)) res.push({kind:"Page",label:n.label+" · "+ch.label,act:"page",key:ch.key}); }); });
+  box.innerHTML = res.length ? res.slice(0,8).map(r=>`<button class="sr-item" role="option" data-action="search-go" data-act="${r.act}" data-id="${r.id||""}" data-key="${r.key||""}"><span class="sr-kind">${r.kind}</span>${esc(r.label)}</button>`).join("") : `<div class="sr-item muted">No matches for “${esc(q)}”</div>`;
+  if(gs) gs.setAttribute("aria-expanded","true");
+}
+function clearSearch(){ const box=document.getElementById("search-results"); if(box) box.innerHTML=""; const gs=document.getElementById("global-search"); if(gs){ gs.value=""; gs.setAttribute("aria-expanded","false"); } }
+handleAction["search-go"] = el=>{ clearSearch(); if(el.dataset.act==="cust"){ state.custView=el.dataset.id; state.page="customers"; render(); document.getElementById("content").scrollTop=0; } else { navTo(el.dataset.key); } };
+
+render();
+
+/* ============================================================
+   BOOKING MODAL (shared) — booking -> calendar event + transaction
+   ============================================================ */
+function bookableServices(){
+  const out = [];
+  LESSONS.forEach(l=>out.push({name:l.name, type:"lesson", category:l.category, price:l.price, coach:l.instructor, room:"Mound 1"}));
+  CLASSES.forEach(c=>out.push({name:c.name, type:"class", category:c.category, price:c.price, coach:c.instructor, room:"Turf Bay"}));
+  RENTALS.forEach(r=>out.push({name:r.name, type:"rental", category:"rental", price:r.price, coach:"c6", room:r.room}));
+  return out;
+}
+function openBookingModal(prefill){
+  const svcs = bookableServices();
+  prefill = prefill||{};
+  const def = svcs[0];
+  openModal({
+    title: prefill.title || "New Booking",
+    desc: "Books the session — it appears on the Calendar and its revenue flows into Reports automatically.",
+    fields: [
+      {key:"customer", label:"Customer", type:"select", value:prefill.customer||"Walk-in", options:customerOptions(prefill.customer), required:true},
+      {key:"service", label:"Service", type:"select", value:prefill.service||def.name, options:svcs.map(s=>s.name), required:true},
+      {key:"coach", label:"Staff / Coach", type:"select", value:prefill.coach||def.coach, options:COACHES.map(c=>({value:c.id,label:c.name})), half:true},
+      {key:"date", label:"Date", type:"date", value:prefill.date||state.cal.date, half:true, required:true},
+      {key:"slot", label:"Start time", type:"select", value:prefill.slot!=null?prefill.slot:0, options:SLOTS.map((s,i)=>({value:i,label:s})), half:true},
+      {key:"len", label:"Duration (hours)", type:"select", value:prefill.len||1, options:[{value:1,label:"1 hour"},{value:2,label:"2 hours"},{value:3,label:"3 hours"}], half:true},
+      {key:"rooms", label:"Room(s) — select one or more", type:"multiselect", value:prefill.rooms||[prefill.room||def.room], options:ROOMS},
+    ],
+    submitLabel: "Confirm Booking",
+    onSubmit: data => {
+      const svc = svcs.find(s=>s.name===data.service) || def;
+      const slot = Number(data.slot), len = Number(data.len);
+      const rooms = (data.rooms&&data.rooms.length)?data.rooms:[def.room];
+      const proceed = ()=>{
+        const covered = memberCoverage(data.customer, svc.type);
+        const rev = covered ? 0 : (svc.type==="rental" ? svc.price*len : svc.price);
+        const txnId = newTxnId();
+        const end = slotLabel(Math.min(slot+len, SLOTS.length-1));
+        EVENTS.push({ id:newEvtId(), date:data.date, slot, len, rooms, room:rooms[0], coach:data.coach, service:svc.name, type:svc.type, customer:data.customer, category:svc.category, revenue:rev, txnId });
+        TRANSACTIONS.unshift({ id:txnId, date:data.date, customer:data.customer, staff:data.coach, service:svc.name, room:rooms.join(" + "), type:svc.type, amount:rev, start:slotLabel(slot), end, covered });
+        closeModal();
+        toast(covered ? "Booked: "+svc.name+" — included in "+data.customer+"'s membership" : "Booked: "+svc.name+" — added to calendar & reports"+(rooms.length>1?" ("+rooms.length+" rooms)":""));
+        state.page="calendar"; state.cal.date=data.date; render();
+      };
+      const cf = findConflicts(data.date, slot, len, rooms, data.coach, null);
+      if(cf.length){ confirmModal({ title:"Scheduling conflict", danger:true, yesLabel:"Book anyway", cancelLabel:"Pick another time",
+        html:`<div class="warn-box">${cf.map(c=>`<div>• ${c}</div>`).join("")}</div><p class="small muted mt-3">You can override, but this overlaps an existing booking or a coach's blocked time.</p>`,
+        onYes: proceed, onCancel: ()=>openBookingModal(data) }); return; }
+      proceed();
+    }
+  });
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+function pageDashboard(){
+  const todayISO = iso(TODAY);
+  const todays = EVENTS.filter(e=>e.date===todayISO).sort((a,b)=>a.slot-b.slot);
+  const monthRev = TRANSACTIONS.filter(t=>t.date>="2026-06-01").reduce((s,t)=>s+t.amount,0);
+  const weekStart = iso(WEEK0), weekEnd = iso(addDays(WEEK0,6));
+  const weekBookings = EVENTS.filter(e=>e.date>=weekStart && e.date<=weekEnd).length;
+  const totalMembers = MEMBERSHIPS.reduce((s,m)=>s+m.members,0);
+  const attn = CUSTOMERS.filter(c=>!c.waiver);
+  return `
+    <div class="hero">
+      <div class="hero-date">${dayName(TODAY)} · ${fmtDate(TODAY)} · Wharton, NJ</div>
+      <div class="hero-title">Welcome back, Henry</div>
+      <div class="hero-sub">Train smarter, play better. Here's how Total Arm Care is running today.</div>
+    </div>
+    <div class="grid-4 mb-4">
+      <button class="stat-card" data-action="nav" data-key="reports">${statInner("Revenue (June)", money(monthRev), "+12% vs. May", "up")}</button>
+      <button class="stat-card blue" data-action="nav" data-key="calendar">${statInner("Bookings This Week", String(weekBookings), "across 8 rooms")}</button>
+      <button class="stat-card" data-action="nav" data-key="customers">${statInner("Active Members", String(totalMembers), "+5 this week", "up")}</button>
+      <button class="stat-card blue" data-action="nav" data-key="svc-rentals">${statInner("Golf Den Occupancy", "72%", money(4290)+" this week")}</button>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;" class="mb-4">
+      <div class="card">
+        <div class="flex between center mb-4"><h3>Today's Sessions</h3><button class="btn btn-secondary btn-sm" data-action="nav" data-key="calendar">Open Calendar →</button></div>
+        ${todays.length? todays.map(e=>`
+          <button class="cal-event ${catCls(e.category)}" style="margin-bottom:8px;" data-action="edit-event" data-id="${e.id}">
+            <div class="flex between center">
+              <div><span class="cal-ev-name">${esc(e.customer)} — ${esc(e.service)}</span><div class="cal-ev-meta">${esc(slotLabel(e.slot))} · ${esc(roomLabel(e))} · ${esc(coachName(e.coach))}</div></div>
+              <span class="xs b">${money(e.revenue)}</span>
+            </div>
+          </button>`).join("") : `<div class="empty">No sessions scheduled today.</div>`}
+      </div>
+      <div class="card">
+        <div class="flex between center mb-4"><h3>Needs Attention</h3></div>
+        ${attn.length? attn.map(c=>`
+          <button class="card-tight" style="display:flex;gap:10px;align-items:center;width:100%;border:1px solid var(--tac-line);border-radius:9px;margin-bottom:9px;background:#fff;cursor:pointer;text-align:left;font-family:inherit;" data-action="cust-view" data-id="${c.id}">
+            <span class="dot" aria-hidden="true"></span>
+            <span><span class="small b" style="display:block;">${esc(c.name)}</span><span class="xs muted">Waiver not on file</span></span>
+          </button>`).join("") : `<div class="empty">All clear.</div>`}
+        <div class="divider"></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" data-action="new-booking">+ New Booking</button>
+      </div>
+    </div>
+    <div class="grid-3">
+      <button class="card clickable" data-action="nav" data-key="svc-memberships">${statInner("Memberships", String(MEMBERSHIPS.length)+" plans", money(MEMBERSHIPS.reduce((s,m)=>s+m.price*m.members,0))+" MRR")}</button>
+      <button class="card clickable" data-action="nav" data-key="marketing">${statInner("Active Coupons", String(COUPONS.filter(c=>c.status==="Active").length), COUPONS.reduce((s,c)=>s+c.uses,0)+" redemptions")}</button>
+      <button class="card clickable" data-action="nav" data-key="reports">${statInner("Transactions (June)", String(TRANSACTIONS.filter(t=>t.date>="2026-06-01").length), money(monthRev)+" collected")}</button>
+    </div>`;
+}
+function statInner(label,value,sub,dir){ return `<div class="stat-label">${esc(label)}</div><div class="stat-value">${esc(value)}</div>${sub?`<div class="stat-sub ${dir||""}">${esc(sub)}</div>`:""}`; }
+
+/* ============================================================
+   SERVICES — shared search bar + 5 subcategory pages
+   ============================================================ */
+function svcSearchBar(key, placeholder, newLabel, newAction){
+  const val = state.svcSearch[key]||"";
+  return `<div class="card card-tight mb-4 flex between center gap-3 wrap">
+    <div class="search" role="search" style="flex:1;min-width:220px;">
+      <span class="search-icon" aria-hidden="true">⌕</span>
+      <label for="svc-q" class="sr-only">${esc(placeholder)}</label>
+      <input type="text" id="svc-q" placeholder="${esc(placeholder)}" value="${esc(val)}" data-action="svc-search" style="width:100%;" autocomplete="off" />
+    </div>
+    <button class="btn btn-primary" data-action="${newAction}">+ ${esc(newLabel)}</button>
+  </div>`;
+}
+function svcMatch(key, text){ const q=(state.svcSearch[key]||"").toLowerCase(); return !q || text.toLowerCase().includes(q); }
+
+function pageRentals(){
+  const list = RENTALS.filter(r=>svcMatch("svc-rentals", r.name+" "+r.visibility));
+  return svcSearchBar("svc-rentals","Search rentals…","New Rental","new-rental") + `
+    <div class="table-card"><div class="table-scroll"><table>
+      <caption class="sr-only">Facility rentals</caption>
+      <thead><tr><th>Rental</th><th>Room</th><th>Price</th><th>Visibility</th><th>Availability</th><th><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody>${list.length?list.map(r=>`<tr class="clickable" data-action="edit-rental" data-id="${r.id}">
+        <td class="b">${esc(r.name)}</td><td>${esc(r.room)}</td><td class="b">${money(r.price)} <span class="muted xs">${esc(r.unit)}</span></td>
+        <td>${pill(r.visibility, r.visibility==="Public"?"blue":"slate")}</td><td class="small muted">${esc(r.availability)}</td>
+        <td class="text-right"><button class="btn btn-secondary btn-sm" data-action="edit-rental" data-id="${r.id}">Edit</button></td>
+      </tr>`).join(""):`<tr><td colspan="6"><div class="empty">No rentals match your search.</div></td></tr>`}</tbody>
+    </table></div></div>`;
+}
+function pageLessons(){
+  const list = LESSONS.filter(l=>svcMatch("svc-lessons", l.name+" "+coachName(l.instructor)));
+  return svcSearchBar("svc-lessons","Search lessons…","New Lesson","new-lesson") + `
+    <div class="table-card"><div class="table-scroll"><table>
+      <caption class="sr-only">Private lessons</caption>
+      <thead><tr><th>Lesson</th><th>Price</th><th>Duration</th><th>Instructor</th><th>Focus</th><th><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody>${list.length?list.map(l=>`<tr class="clickable" data-action="edit-lesson" data-id="${l.id}">
+        <td class="b">${esc(l.name)}</td><td class="b">${money(l.price)}</td><td>${esc(l.duration)}</td><td>${esc(coachName(l.instructor))}</td>
+        <td>${pill(catLabel(l.category),"slate")}</td>
+        <td class="text-right"><button class="btn btn-secondary btn-sm" data-action="edit-lesson" data-id="${l.id}">Edit</button></td>
+      </tr>`).join(""):`<tr><td colspan="6"><div class="empty">No lessons match your search.</div></td></tr>`}</tbody>
+    </table></div></div>`;
+}
+function pageClasses(){
+  const list = CLASSES.filter(c=>svcMatch("svc-classes", c.name+" "+c.visibility+" "+c.status));
+  return svcSearchBar("svc-classes","Search classes…","New Class","new-class") + `
+    <div class="table-card"><div class="table-scroll"><table>
+      <caption class="sr-only">Group classes</caption>
+      <thead><tr><th>Class</th><th>Who Can See</th><th>Status</th><th>Runs</th><th>Registration</th><th>Price</th><th><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody>${list.length?list.map(c=>`<tr class="clickable" data-action="edit-class" data-id="${c.id}">
+        <td class="b">${esc(c.name)}</td><td>${pill(c.visibility, c.visibility==="Public"?"blue":"purple")}</td>
+        <td>${pill(c.status, c.status==="Active"?"green":"slate")}</td><td class="small">${esc(c.dates)}</td>
+        <td>${pill(c.registration, c.registration==="Open"?"green":"amber")}</td><td class="b">${money(c.price)}</td>
+        <td class="text-right"><button class="btn btn-secondary btn-sm" data-action="edit-class" data-id="${c.id}">Edit</button></td>
+      </tr>`).join(""):`<tr><td colspan="7"><div class="empty">No classes match your search.</div></td></tr>`}</tbody>
+    </table></div></div>`;
+}
+function pageMemberships(){
+  const list = MEMBERSHIPS.filter(m=>svcMatch("svc-memberships", m.name+" "+m.frequency));
+  return svcSearchBar("svc-memberships","Search memberships…","New Membership","new-membership") + `
+    <div class="table-card"><div class="table-scroll"><table>
+      <caption class="sr-only">Memberships</caption>
+      <thead><tr><th>Membership</th><th>Price</th><th>Billed</th><th>Credits</th><th>Discount</th><th>Members</th><th><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody>${list.length?list.map(m=>`<tr class="clickable" data-action="edit-membership" data-id="${m.id}">
+        <td><div class="b">${esc(m.name)}</div>${m.description?`<div class="xs muted" style="max-width:320px;">${esc(m.description)}</div>`:""}</td>
+        <td class="b">${money(m.price)}</td><td>${pill(m.frequency,"blue")}</td>
+        <td>${m.unlimited?pill("Unlimited","green"):`<span class="b">${m.credits||0}</span> <span class="muted xs">credits</span>`}</td>
+        <td class="small">${esc(m.discount&&m.discount!=="—"?m.discount:"—")}</td>
+        <td>${m.members} <span class="muted xs">members</span></td>
+        <td class="text-right"><button class="btn btn-secondary btn-sm" data-action="edit-membership" data-id="${m.id}">Edit</button></td>
+      </tr>`).join(""):`<tr><td colspan="7"><div class="empty">No memberships match your search.</div></td></tr>`}</tbody>
+    </table></div></div>`;
+}
+function pagePackages(){
+  const list = PACKAGES.filter(p=>svcMatch("svc-packages", p.name+" "+p.note));
+  return svcSearchBar("svc-packages","Search packages…","New Package","new-package") + `
+    <div class="grid-3">${list.length?list.map(p=>`
+      <div class="card">
+        <div class="flex between center"><h3>${esc(p.name)}</h3></div>
+        <div class="xs muted mt-3">${esc(p.note)}</div>
+        <div class="divider"></div>
+        <div class="flex between center"><span class="stat-value" style="font-size:22px;">${money(p.price)}</span>
+        <button class="btn btn-secondary btn-sm" data-action="edit-package" data-id="${p.id}">Edit</button></div>
+      </div>`).join(""):`<div class="empty" style="grid-column:1/-1;">No packages match your search.</div>`}</div>`;
+}
+
+/* ----- service modals (new + edit) ----- */
+function rentalFields(r){ r=r||{}; return [
+  {key:"name",label:"Rental name",type:"text",value:r.name,required:true},
+  {key:"room",label:"Room",type:"select",value:r.room||"Golf Den",options:ROOMS,half:true},
+  {key:"price",label:"Price ($)",type:"number",value:r.price,half:true,required:true},
+  {key:"unit",label:"Unit",type:"select",value:r.unit||"per hour",options:["per hour","per session","per day"],half:true},
+  {key:"visibility",label:"Visibility",type:"select",value:r.visibility||"Public",options:["Public","Members"],half:true},
+  {key:"availability",label:"Availability",type:"text",value:r.availability,placeholder:"e.g. 7 days/week · 8AM–10PM"},
+];}
+function lessonFields(l){ l=l||{}; return [
+  {key:"name",label:"Lesson name",type:"text",value:l.name,required:true},
+  {key:"price",label:"Price ($)",type:"number",value:l.price,half:true,required:true},
+  {key:"duration",label:"Duration",type:"select",value:l.duration||"60 min",options:["30 min","45 min","60 min","90 min"],half:true},
+  {key:"instructor",label:"Instructor",type:"select",value:l.instructor||"c1",options:COACHES.map(c=>({value:c.id,label:c.name})),half:true},
+  {key:"category",label:"Focus",type:"select",value:l.category||"velocity",options:CATEGORIES.map(c=>({value:c.key,label:c.label})),half:true},
+];}
+function classFields(c){ c=c||{}; return [
+  {key:"name",label:"Class name",type:"text",value:c.name,required:true},
+  {key:"visibility",label:"Who can see",type:"select",value:c.visibility||"Public",options:["Public","Members"],half:true},
+  {key:"status",label:"Status",type:"select",value:c.status||"Active",options:["Active","Inactive"],half:true},
+  {key:"registration",label:"Registration",type:"select",value:c.registration||"Open",options:["Open","Closed"],half:true},
+  {key:"price",label:"Price ($)",type:"number",value:c.price,half:true,required:true},
+  {key:"dates",label:"Runs (dates)",type:"text",value:c.dates,placeholder:"e.g. Jun 2 – Aug 8, 2026"},
+  {key:"instructor",label:"Instructor",type:"select",value:c.instructor||"c1",options:COACHES.map(c=>({value:c.id,label:c.name})),half:true},
+  {key:"category",label:"Focus",type:"select",value:c.category||"velocity",options:CATEGORIES.map(x=>({value:x.key,label:x.label})),half:true},
+];}
+function membershipFields(m){ m=m||{}; return [
+  {key:"name",label:"Membership name",type:"text",value:m.name,required:true},
+  {key:"description",label:"Description",type:"textarea",value:m.description,placeholder:"What this membership is and who it's for"},
+  {key:"price",label:"Price ($)",type:"number",value:m.price,half:true,required:true},
+  {key:"frequency",label:"Billed",type:"select",value:m.frequency||"Monthly",options:["Monthly","Quarterly","Annual"],half:true},
+  {key:"credits",label:"Lesson credits included (1 credit = 1 lesson)",type:"number",value:m.credits||0,half:true},
+  {key:"members",label:"Current members",type:"number",value:m.members||0,half:true},
+  {key:"unlimited",label:"Unlimited credits (overrides the number above)",type:"checkbox",value:m.unlimited||false},
+  {key:"discount",label:"Applicable discount",type:"text",value:m.discount,placeholder:"e.g. 10% off retail products"},
+  {key:"notes",label:"Notes",type:"textarea",value:m.notes,placeholder:"Internal notes about this plan"},
+];}
+function creditsLabel(m){ return m && m.unlimited ? "Unlimited" : ((m&&m.credits)||0)+" / "+((m&&m.frequency==="Monthly")?"mo":(m&&m.frequency)||"period"); }
+function packageFields(p){ p=p||{}; return [
+  {key:"name",label:"Package name",type:"text",value:p.name,required:true},
+  {key:"price",label:"Internal price ($)",type:"number",value:p.price,half:true,required:true},
+  {key:"note",label:"Note",type:"text",value:p.note,placeholder:"e.g. 18 sessions"},
+];}
+
+function svcEdit(arr, id, fields, label, numKeys, page){
+  const item = id ? arr.find(x=>x.id===id) : null;
+  openModal({
+    title: (item?"Edit ":"New ")+label, fields: fields(item),
+    submitLabel: item?"Save Changes":"Create "+label,
+    onSubmit: data => {
+      (numKeys||[]).forEach(k=>{ if(data[k]!=null && data[k]!=="") data[k]=Number(data[k]); });
+      if(item){ Object.assign(item, data); toast(label+" updated"); }
+      else { data.id = label.toLowerCase().replace(/[^a-z]/g,"")+Date.now(); arr.push(data); toast(label+" created"); }
+      closeModal(); state.page=page; render();
+    }
+  });
+}
+handleAction["new-rental"]   = ()=> svcEdit(RENTALS,null,rentalFields,"Rental",["price"],"svc-rentals");
+handleAction["edit-rental"]  = el=> svcEdit(RENTALS,el.dataset.id,rentalFields,"Rental",["price"],"svc-rentals");
+handleAction["new-lesson"]   = ()=> svcEdit(LESSONS,null,lessonFields,"Lesson",["price"],"svc-lessons");
+handleAction["edit-lesson"]  = el=> svcEdit(LESSONS,el.dataset.id,lessonFields,"Lesson",["price"],"svc-lessons");
+handleAction["new-class"]    = ()=> svcEdit(CLASSES,null,classFields,"Class",["price"],"svc-classes");
+handleAction["edit-class"]   = el=> svcEdit(CLASSES,el.dataset.id,classFields,"Class",["price"],"svc-classes");
+handleAction["new-membership"]= ()=> svcEdit(MEMBERSHIPS,null,membershipFields,"Membership",["price","members","credits"],"svc-memberships");
+handleAction["edit-membership"]=el=> svcEdit(MEMBERSHIPS,el.dataset.id,membershipFields,"Membership",["price","members","credits"],"svc-memberships");
+handleAction["new-package"]  = ()=> svcEdit(PACKAGES,null,packageFields,"Package",["price"],"svc-packages");
+handleAction["edit-package"] = el=> svcEdit(PACKAGES,el.dataset.id,packageFields,"Package",["price"],"svc-packages");
+
+/* ============================================================
+   SHARED: month picker + event chip + edit/delete handlers
+   ============================================================ */
+function monthPicker(ns){
+  const st = state[ns];
+  const first = new Date(st.pickerYear, st.pickerMonth, 1);
+  const startPad = (first.getDay()+6)%7; // Mon-based
+  const daysInMonth = new Date(st.pickerYear, st.pickerMonth+1, 0).getDate();
+  const monthName = first.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+  let cells = "";
+  for(let i=0;i<startPad;i++) cells += `<span></span>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const dISO = iso(new Date(st.pickerYear, st.pickerMonth, d));
+    const cls = (dISO===st.date?"sel ":"") + (dISO===iso(TODAY)?"today":"");
+    cells += `<button class="mp-day ${cls}" data-action="${ns}-pick" data-date="${dISO}">${d}</button>`;
+  }
+  return `<div class="monthpick" role="dialog" aria-label="Choose a date">
+    <div class="mp-head">
+      <button class="pg-btn" data-action="${ns}-pmonth" data-dir="-1" aria-label="Previous month">‹</button>
+      <span class="b small">${monthName}</span>
+      <button class="pg-btn" data-action="${ns}-pmonth" data-dir="1" aria-label="Next month">›</button>
+    </div>
+    <div class="mp-grid">${["M","T","W","T","F","S","S"].map(d=>`<span class="mp-dow">${d}</span>`).join("")}${cells}</div>
+  </div>`;
+}
+function evRooms(e){ return (e.rooms && e.rooms.length) ? e.rooms : (e.room?[e.room]:[]); }
+function roomLabel(e){ return evRooms(e).join(" + "); }
+function evChip(e, metaMode){
+  let meta;
+  if(metaMode==="coach") meta = coachName(e.coach);
+  else if(metaMode==="room") meta = roomLabel(e);
+  else meta = roomLabel(e)+" · "+coachName(e.coach);
+  const multi = evRooms(e).length>1 ? ` <span class="pill pill-blue" style="padding:0 6px;font-size:9.5px;">${evRooms(e).length} rooms</span>` : "";
+  return `<button class="cal-event ${catCls(e.category)}" data-action="edit-event" data-id="${e.id}">
+    <span class="cal-ev-name">${esc(e.customer)}${multi}</span>
+    <span class="cal-ev-meta">${esc(e.service)} · ${esc(meta)}</span></button>`;
+}
+function unavailChip(u){
+  return `<button class="cal-event ev-unavail" data-action="edit-unavail" data-id="${u.id}">
+    <span class="cal-ev-name">Unavailable</span><span class="cal-ev-meta">${esc(u.reason||"")}</span></button>`;
+}
+function contBlock(e){ return `<div class="cal-cont ${catCls(e.category)}" aria-hidden="true" title="${esc(e.service)} (continued)"></div>`; }
+
+/* ---------- shared booking logic: conflicts, coverage, customers, confirm ---------- */
+function customerOptions(extra){
+  const opts = ["Walk-in"].concat(CUSTOMERS.map(c=>c.name));
+  if(extra && !opts.includes(extra)) opts.unshift(extra);
+  return opts;
+}
+function memberCoverage(customerName, type){
+  const c = CUSTOMERS.find(x=>x.name===customerName);
+  if(!c || !c.membership || c.membership==="None" || c.membership==="—") return false;
+  return type==="lesson"; // private lessons are included for members; classes/camps & rentals always bill
+}
+function overlaps(aS,aL,bS,bL){ return aS < bS+bL && bS < aS+aL; }
+function findConflicts(date,slot,len,rooms,coach,ignoreId){
+  const want = Array.isArray(rooms)?rooms:[rooms];
+  const out=[];
+  EVENTS.forEach(e=>{ if(e.id===ignoreId || e.date!==date) return;
+    if(overlaps(slot,len,e.slot,e.len)){
+      evRooms(e).filter(r=>want.includes(r)).forEach(r=> out.push(esc(r)+" is already booked — "+esc(e.customer)+" · "+esc(e.service)+" at "+esc(slotLabel(e.slot))));
+      if(e.coach===coach) out.push(esc(coachName(coach))+" is already booked — "+esc(e.customer)+" at "+esc(slotLabel(e.slot)));
+    }
+  });
+  UNAVAIL.forEach(u=>{ if(u.date!==date || u.coach!==coach) return;
+    if(overlaps(slot,len,u.slot,u.len)) out.push(esc(coachName(coach))+" is marked unavailable"+(u.reason?" ("+esc(u.reason)+")":""));
+  });
+  return [...new Set(out)];
+}
+function confirmModal(opts){
+  document.getElementById("modal-root").innerHTML = `
+    <div class="modal-overlay" data-action="overlay-close">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cm-title">
+        <div class="modal-head"><div><div class="modal-title" id="cm-title">${esc(opts.title)}</div></div>
+        <button class="modal-x" data-action="modal-close" aria-label="Close dialog">✕</button></div>
+        <div class="modal-body">${opts.html||""}</div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-secondary" id="cm-cancel">${esc(opts.cancelLabel||"Cancel")}</button>
+          <button type="button" class="btn ${opts.danger?"btn-danger":"btn-primary"}" id="cm-yes">${esc(opts.yesLabel||"Confirm")}</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById("cm-yes").addEventListener("click", ()=>{ if(opts.onYes) opts.onYes(); });
+  document.getElementById("cm-cancel").addEventListener("click", ()=>{ closeModal(); if(opts.onCancel) opts.onCancel(); });
+}
+
+function editEventModal(id){
+  const e = EVENTS.find(x=>x.id===id); if(!e) return;
+  const svcs = bookableServices();
+  openModal({
+    title:"Edit Session", desc:"Update or cancel this booking. Changes sync to the calendar and reports.",
+    fields:[
+      {key:"customer",label:"Customer",type:"select",value:e.customer,options:customerOptions(e.customer),required:true},
+      {key:"service",label:"Service",type:"select",value:e.service,options:svcs.map(s=>s.name)},
+      {key:"coach",label:"Staff / Coach",type:"select",value:e.coach,options:COACHES.map(c=>({value:c.id,label:c.name})),half:true},
+      {key:"date",label:"Date",type:"date",value:e.date,half:true},
+      {key:"slot",label:"Start time",type:"select",value:e.slot,options:SLOTS.map((s,i)=>({value:i,label:s})),half:true},
+      {key:"len",label:"Duration (hours)",type:"select",value:e.len,options:[{value:1,label:"1 hour"},{value:2,label:"2 hours"},{value:3,label:"3 hours"}],half:true},
+      {key:"rooms",label:"Room(s) — select one or more",type:"multiselect",value:evRooms(e),options:ROOMS},
+    ],
+    submitLabel:"Save Changes",
+    extraFootHTML:`<button type="button" class="btn btn-danger" data-action="delete-event" data-id="${e.id}" style="margin-right:auto;">Cancel Booking</button>`,
+    onSubmit:data=>{
+      const svc = svcs.find(s=>s.name===data.service) || {category:e.category, type:e.type, price:e.revenue};
+      const slot=Number(data.slot), len=Number(data.len);
+      const rooms = (data.rooms&&data.rooms.length)?data.rooms:evRooms(e);
+      const apply = ()=>{
+        const covered = memberCoverage(data.customer, svc.type);
+        const rev = covered ? 0 : (svc.type==="rental" ? svc.price*len : svc.price);
+        Object.assign(e,{customer:data.customer,service:data.service,coach:data.coach,rooms,room:rooms[0],date:data.date,slot,len,category:svc.category,type:svc.type,revenue:rev});
+        const t = e.txnId && TRANSACTIONS.find(x=>x.id===e.txnId);
+        if(t){ Object.assign(t,{date:data.date,customer:data.customer,staff:data.coach,service:data.service,room:rooms.join(" + "),type:svc.type,amount:rev,start:slotLabel(slot),end:slotLabel(Math.min(slot+len,SLOTS.length-1)),covered}); }
+        closeModal(); toast(covered?"Updated — included in "+data.customer+"'s membership":"Session updated"); render();
+      };
+      const cf = findConflicts(data.date,slot,len,rooms,data.coach,e.id);
+      if(cf.length){ confirmModal({ title:"Scheduling conflict", danger:true, yesLabel:"Save anyway", cancelLabel:"Pick another time",
+        html:`<div class="warn-box">${cf.map(c=>`<div>• ${c}</div>`).join("")}</div>`, onYes:apply, onCancel:()=>editEventModal(id) }); return; }
+      apply();
+    }
+  });
+}
+handleAction["edit-event"] = el=> editEventModal(el.dataset.id);
+handleAction["new-event"] = ()=> openBookingModal();
+handleAction["delete-event"] = el=>{
+  const id = el.dataset.id; const e = EVENTS.find(x=>x.id===id);
+  confirmModal({ title:"Cancel this booking?", danger:true, yesLabel:"Yes, cancel booking", cancelLabel:"Keep it",
+    html:`<p class="small">${e?esc(e.customer+" — "+e.service+" on "+e.date+" at "+slotLabel(e.slot)):""}</p><p class="small muted mt-3">This removes it from the calendar and reverses its revenue in Reports.</p>`,
+    onYes:()=>{ const i=EVENTS.findIndex(x=>x.id===id); if(i>=0){ const ev=EVENTS[i]; EVENTS.splice(i,1); if(ev.txnId){ const ti=TRANSACTIONS.findIndex(t=>t.id===ev.txnId); if(ti>=0) TRANSACTIONS.splice(ti,1); } } closeModal(); toast("Booking cancelled — removed from calendar & reports"); render(); },
+    onCancel:()=>editEventModal(id) });
+};
+
+/* ============================================================
+   CALENDAR
+   ============================================================ */
+function pageCalendar(){
+  const st = state.cal;
+  const d = parseISO(st.date);
+  const dateBtnLabel = st.view==="week" ? "Week of "+fmtDateShort(startOfWeek(d)) : fmtDate(d);
+  let grid;
+  if(st.view==="day"){
+    const resources = st.mode==="rooms" ? ROOMS : COACHES.map(c=>c.id);
+    const head = st.mode==="rooms" ? ROOMS : COACHES.map(c=>c.name);
+    grid = `<table class="cal"><thead><tr><th class="time-col">Time</th>${head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>`+
+      SLOTS.map((slot,si)=>`<tr><td class="time-col">${esc(slot)}</td>`+
+        resources.map(res=>{
+          const match = e=> e.date===st.date && (st.mode==="rooms"?evRooms(e).includes(res):e.coach===res);
+          const starts = EVENTS.filter(e=>match(e) && e.slot===si);
+          const conts = EVENTS.filter(e=>match(e) && e.slot<si && e.slot+e.len>si);
+          return `<td>${starts.map(e=>evChip(e, st.mode==="rooms"?"coach":"room")).join("")}${conts.map(contBlock).join("")}</td>`;
+        }).join("")+`</tr>`).join("")+`</tbody></table>`;
+  } else {
+    const wk = startOfWeek(d);
+    const days = Array.from({length:7},(_,i)=>addDays(wk,i));
+    grid = `<table class="cal"><thead><tr><th class="time-col">Time</th>${days.map((dd,i)=>`<th>${DOW[i]}<br><span class="muted xs">${dd.getMonth()+1}/${dd.getDate()}</span></th>`).join("")}</tr></thead><tbody>`+
+      SLOTS.map((slot,si)=>`<tr><td class="time-col">${esc(slot)}</td>`+
+        days.map(dd=>{ const di=iso(dd); const starts=EVENTS.filter(e=>e.date===di && e.slot===si); const conts=EVENTS.filter(e=>e.date===di && e.slot<si && e.slot+e.len>si); return `<td>${starts.map(e=>evChip(e,"all")).join("")}${conts.map(contBlock).join("")}</td>`; }).join("")+
+        `</tr>`).join("")+`</tbody></table>`;
+  }
+  return `
+    <div class="cal-toolbar">
+      <div class="flex gap-3 center wrap">
+        <div class="seg" role="group" aria-label="Resource view">
+          <button class="${st.mode==="rooms"?"active":""}" data-action="cal-mode" data-mode="rooms" aria-pressed="${st.mode==="rooms"}">Rooms</button>
+          <button class="${st.mode==="staff"?"active":""}" data-action="cal-mode" data-mode="staff" aria-pressed="${st.mode==="staff"}">Staff</button>
+        </div>
+        <div class="seg" role="group" aria-label="Time range">
+          <button class="${st.view==="day"?"active":""}" data-action="cal-view" data-view="day" aria-pressed="${st.view==="day"}">Day</button>
+          <button class="${st.view==="week"?"active":""}" data-action="cal-view" data-view="week" aria-pressed="${st.view==="week"}">Week</button>
+        </div>
+      </div>
+      <div class="flex gap-2 center">
+        <button class="btn btn-primary btn-sm" data-action="new-event">+ Add Session</button>
+        <button class="pg-btn" data-action="cal-prev" aria-label="Previous">‹</button>
+        <div style="position:relative;">
+          <button class="btn btn-secondary btn-sm" data-action="cal-toggle-picker" aria-haspopup="dialog" aria-expanded="${st.pickerOpen}">📅 ${esc(dateBtnLabel)}</button>
+          ${st.pickerOpen?monthPicker("cal"):""}
+        </div>
+        <button class="pg-btn" data-action="cal-next" aria-label="Next">›</button>
+        <button class="btn btn-ghost btn-sm" data-action="cal-today">Today</button>
+      </div>
+    </div>
+    <div class="card card-tight mb-4 cat-legend" aria-label="Category legend">
+      ${CATEGORIES.map(c=>`<span class="legend-item"><span class="legend-dot ${c.cls}" style="border-left:none;"></span>${esc(c.label)}</span>`).join("")}
+    </div>
+    <div class="table-card"><div class="cal-grid-wrap" style="padding:6px;">${grid}</div></div>`;
+}
+handleAction["cal-mode"] = el=>{ state.cal.mode=el.dataset.mode; render(); };
+handleAction["cal-view"] = el=>{ state.cal.view=el.dataset.view; render(); };
+handleAction["cal-prev"] = ()=>{ state.cal.date=iso(addDays(parseISO(state.cal.date), state.cal.view==="week"?-7:-1)); syncPicker("cal"); render(); };
+handleAction["cal-next"] = ()=>{ state.cal.date=iso(addDays(parseISO(state.cal.date), state.cal.view==="week"?7:1)); syncPicker("cal"); render(); };
+handleAction["cal-today"] = ()=>{ state.cal.date=iso(TODAY); state.cal.pickerOpen=false; syncPicker("cal"); render(); };
+handleAction["cal-toggle-picker"] = ()=>{ state.cal.pickerOpen=!state.cal.pickerOpen; render(); };
+handleAction["cal-pick"] = el=>{ state.cal.date=el.dataset.date; state.cal.pickerOpen=false; render(); };
+handleAction["cal-pmonth"] = el=>{ shiftPickerMonth("cal", Number(el.dataset.dir)); render(); };
+function syncPicker(ns){ const dd=parseISO(state[ns].date); state[ns].pickerMonth=dd.getMonth(); state[ns].pickerYear=dd.getFullYear(); }
+function shiftPickerMonth(ns,dir){ let m=state[ns].pickerMonth+dir, y=state[ns].pickerYear; if(m<0){m=11;y--;} if(m>11){m=0;y++;} state[ns].pickerMonth=m; state[ns].pickerYear=y; }
+
+/* ============================================================
+   AVAILABILITY  (staff only; + manual unavailability)
+   ============================================================ */
+function pageAvailability(){
+  const st = state.avail;
+  const d = parseISO(st.date);
+  const dateBtnLabel = st.view==="week" ? "Week of "+fmtDateShort(startOfWeek(d)) : fmtDate(d);
+  let grid;
+  if(st.view==="day"){
+    grid = `<table class="cal"><thead><tr><th class="time-col">Time</th>${COACHES.map(c=>`<th>${esc(c.name.split(" ")[0])} ${esc(c.name.split(" ").slice(-1)[0][0])}.</th>`).join("")}</tr></thead><tbody>`+
+      SLOTS.map((slot,si)=>`<tr><td class="time-col">${esc(slot)}</td>`+
+        COACHES.map(c=>{
+          const starts = EVENTS.filter(e=>e.date===st.date && e.slot===si && e.coach===c.id);
+          const conts = EVENTS.filter(e=>e.date===st.date && e.coach===c.id && e.slot<si && e.slot+e.len>si);
+          const un = UNAVAIL.filter(u=>u.date===st.date && u.coach===c.id && si>=u.slot && si<u.slot+u.len);
+          return `<td>${starts.map(e=>evChip(e,"room")).join("")}${conts.map(contBlock).join("")}${un.map(u=>si===u.slot?unavailChip(u):`<div class="cal-cont ev-unavail"></div>`).join("")}</td>`;
+        }).join("")+`</tr>`).join("")+`</tbody></table>`;
+  } else {
+    const wk = startOfWeek(d); const days = Array.from({length:7},(_,i)=>addDays(wk,i));
+    grid = `<table class="cal"><thead><tr><th class="time-col">Time</th>${days.map((dd,i)=>`<th>${DOW[i]}<br><span class="muted xs">${dd.getMonth()+1}/${dd.getDate()}</span></th>`).join("")}</tr></thead><tbody>`+
+      SLOTS.map((slot,si)=>`<tr><td class="time-col">${esc(slot)}</td>`+
+        days.map(dd=>{ const di=iso(dd);
+          const starts=EVENTS.filter(e=>e.date===di && e.slot===si);
+          const conts=EVENTS.filter(e=>e.date===di && e.slot<si && e.slot+e.len>si);
+          const un=UNAVAIL.filter(u=>u.date===di && si===u.slot);
+          return `<td>${starts.map(e=>evChip(e,"coach")).join("")}${conts.map(contBlock).join("")}${un.map(u=>unavailChip(u)).join("")}</td>`;
+        }).join("")+`</tr>`).join("")+`</tbody></table>`;
+  }
+  return `
+    <div class="cal-toolbar">
+      <div class="seg" role="group" aria-label="Time range">
+        <button class="${st.view==="day"?"active":""}" data-action="avail-view" data-view="day" aria-pressed="${st.view==="day"}">Day</button>
+        <button class="${st.view==="week"?"active":""}" data-action="avail-view" data-view="week" aria-pressed="${st.view==="week"}">Week</button>
+      </div>
+      <div class="flex gap-2 center">
+        <button class="pg-btn" data-action="avail-prev" aria-label="Previous">‹</button>
+        <div style="position:relative;">
+          <button class="btn btn-secondary btn-sm" data-action="avail-toggle-picker" aria-haspopup="dialog" aria-expanded="${st.pickerOpen}">📅 ${esc(dateBtnLabel)}</button>
+          ${st.pickerOpen?monthPicker("avail"):""}
+        </div>
+        <button class="pg-btn" data-action="avail-next" aria-label="Next">›</button>
+        <button class="btn btn-ghost btn-sm" data-action="avail-today">Today</button>
+      </div>
+    </div>
+    <div class="card card-tight mb-4 flex between center wrap gap-3">
+      <span class="legend-item"><span class="legend-dot ev-velocity"></span>Booked session</span>
+      <span class="legend-item"><span class="legend-dot ev-unavail"></span>Marked unavailable</span>
+    </div>
+    <div class="table-card mb-4"><div class="cal-grid-wrap" style="padding:6px;">${grid}</div></div>
+    <div class="flex gap-2">
+      <button class="btn btn-primary" data-action="new-event" style="flex:1;justify-content:center;">+ Add session (reserve room(s))</button>
+      <button class="btn btn-blue" data-action="add-unavail" style="flex:1;justify-content:center;">+ Mark a coach unavailable</button>
+    </div>`;
+}
+handleAction["avail-view"] = el=>{ state.avail.view=el.dataset.view; render(); };
+handleAction["avail-prev"] = ()=>{ state.avail.date=iso(addDays(parseISO(state.avail.date), state.avail.view==="week"?-7:-1)); syncPicker("avail"); render(); };
+handleAction["avail-next"] = ()=>{ state.avail.date=iso(addDays(parseISO(state.avail.date), state.avail.view==="week"?7:1)); syncPicker("avail"); render(); };
+handleAction["avail-today"] = ()=>{ state.avail.date=iso(TODAY); state.avail.pickerOpen=false; syncPicker("avail"); render(); };
+handleAction["avail-toggle-picker"] = ()=>{ state.avail.pickerOpen=!state.avail.pickerOpen; render(); };
+handleAction["avail-pick"] = el=>{ state.avail.date=el.dataset.date; state.avail.pickerOpen=false; render(); };
+handleAction["avail-pmonth"] = el=>{ shiftPickerMonth("avail", Number(el.dataset.dir)); render(); };
+function unavailModal(id){
+  const u = id ? UNAVAIL.find(x=>x.id===id) : null;
+  openModal({
+    title: u?"Edit Unavailability":"Mark Unavailable",
+    desc:"Block time when a coach can't take sessions.",
+    fields:[
+      {key:"coach",label:"Coach",type:"select",value:u?u.coach:"c1",options:COACHES.map(c=>({value:c.id,label:c.name}))},
+      {key:"date",label:"Date",type:"date",value:u?u.date:state.avail.date,half:true},
+      {key:"slot",label:"Start time",type:"select",value:u?u.slot:0,options:SLOTS.map((s,i)=>({value:i,label:s})),half:true},
+      {key:"len",label:"Duration (hours)",type:"select",value:u?u.len:1,options:[{value:1,label:"1 hour"},{value:2,label:"2 hours"},{value:3,label:"3 hours"},{value:4,label:"4 hours"}],half:true},
+      {key:"reason",label:"Reason",type:"text",value:u?u.reason:"",placeholder:"e.g. Recruiting trip"},
+    ],
+    submitLabel: u?"Save":"Mark Unavailable",
+    extraFootHTML: u?`<button type="button" class="btn btn-danger" data-action="delete-unavail" data-id="${u.id}" style="margin-right:auto;">Remove</button>`:"",
+    onSubmit:data=>{
+      if(u){ Object.assign(u,{coach:data.coach,date:data.date,slot:Number(data.slot),len:Number(data.len),reason:data.reason}); toast("Updated"); }
+      else { UNAVAIL.push({id:newEvtId(),coach:data.coach,date:data.date,slot:Number(data.slot),len:Number(data.len),reason:data.reason}); toast("Coach marked unavailable"); }
+      closeModal(); state.avail.date=data.date; render();
+    }
+  });
+}
+handleAction["add-unavail"] = ()=> unavailModal(null);
+handleAction["edit-unavail"] = el=> unavailModal(el.dataset.id);
+handleAction["delete-unavail"] = el=>{ const i=UNAVAIL.findIndex(x=>x.id===el.dataset.id); if(i>=0){UNAVAIL.splice(i,1); closeModal(); toast("Removed"); render();} };
+
+/* ============================================================
+   CUSTOMERS
+   ============================================================ */
+function pageCustomers(){
+  const q = state.cust.q.toLowerCase().trim();
+  const list = CUSTOMERS.filter(c=> !q || (c.name+" "+c.email+" "+c.phone).toLowerCase().includes(q));
+  return `
+    <div class="card card-tight mb-4 flex between center gap-3 wrap">
+      <div class="search" role="search" style="flex:1;min-width:240px;">
+        <span class="search-icon" aria-hidden="true">⌕</span>
+        <label for="cust-q" class="sr-only">Search customers by name, email, or phone</label>
+        <input type="text" id="cust-q" placeholder="Search by name, email, or phone…" value="${esc(state.cust.q)}" data-action="cust-search" style="width:100%;" autocomplete="off" />
+      </div>
+      <div class="flex gap-2">
+        <button class="btn btn-secondary" data-action="cust-import">⤓ Import</button>
+        <button class="btn btn-primary" data-action="cust-new">+ New Customer</button>
+      </div>
+    </div>
+    <div class="table-card"><div class="table-scroll"><table>
+      <caption class="sr-only">Customers</caption>
+      <thead><tr><th>Name</th><th>When Paid</th><th>Email</th><th>Phone</th><th>Age</th><th>Membership</th><th>Waiver</th></tr></thead>
+      <tbody>${list.length?list.map(c=>`<tr class="clickable" data-action="cust-view" data-id="${c.id}">
+        <td><button class="row-link" data-action="cust-view" data-id="${c.id}">${esc(c.name)}</button></td>
+        <td>${esc(fmtDateShort(parseISO(c.paid)))}</td><td class="small muted">${esc(c.email)}</td><td class="small">${esc(c.phone)}</td>
+        <td>${c.childAge}</td><td>${pill(c.membership, c.membership.includes("Pro")?"orange":"blue")}</td>
+        <td>${c.waiver?pill("On file","green"):pill("Missing","red")}</td>
+      </tr>`).join(""):`<tr><td colspan="7"><div class="empty">No customers match your search.</div></td></tr>`}</tbody>
+    </table></div>
+    <div class="pager"><div>${list.length} of ${CUSTOMERS.length} customers</div></div></div>`;
+}
+function custTxnsFor(c){ return TRANSACTIONS.filter(t=> t.customer.toLowerCase().includes(c.name.split(" ")[0].toLowerCase()) || c.name.toLowerCase().includes(t.customer.split(" ")[0].toLowerCase())); }
+function addMonths(d,n){ const x=new Date(d); x.setMonth(x.getMonth()+n); return x; }
+function pageCustomerDetail(){
+  const c = custById(state.custView); if(!c) return pageCustomers();
+  const tab = state.custTab||"profile";
+  const tabs = [["profile","Profile"],["billing","Billing"],["memberships","Memberships"],["packages","Packages"],["activity","Activity"],["invoices","Invoices"],["credits","Credits"]];
+  const body = custTab(c, tab);
+  return `
+    <button class="btn btn-ghost btn-sm mb-4" data-action="cust-back">‹ Back to customers</button>
+    <div class="card mb-4">
+      <div class="flex between center wrap gap-3">
+        <div class="flex gap-3 center"><div class="avatar" style="width:48px;height:48px;font-size:17px;" aria-hidden="true">${esc(c.name.split(" ").map(n=>n[0]).join("").slice(0,2))}</div>
+        <div><h2>${esc(c.name)}</h2><div class="small muted">${esc(c.membership)} · member since ${esc(fmtDate(parseISO(c.since)))} ${c.waiver?"":'· '+pill("Waiver missing","red")}</div></div></div>
+        <div class="flex gap-2"><button class="btn btn-secondary btn-sm" data-action="cust-edit" data-id="${c.id}">Edit</button><button class="btn btn-primary btn-sm" data-action="cust-book" data-id="${c.id}">Book a session</button></div>
+      </div>
+    </div>
+    <div class="tabs mb-4" role="tablist" style="flex-wrap:wrap;">${tabs.map(t=>`<button class="tab ${tab===t[0]?"active":""}" role="tab" aria-selected="${tab===t[0]}" data-action="cust-tab" data-tab="${t[0]}">${t[1]}</button>`).join("")}</div>
+    ${body}`;
+}
+function custTab(c, tab){
+  const txns = custTxnsFor(c);
+  const mem = MEMBERSHIPS.find(m=>m.name===c.membership);
+  const sessions = txns.filter(t=>["lesson","class","rental"].includes(t.type));
+  const lessonsUsed = txns.filter(t=>t.type==="lesson"||t.type==="class").length;
+  const pkgs = txns.filter(t=>t.type==="package");
+  if(tab==="profile"){
+    return `<div class="grid-2"><div class="card">
+        <h3 class="mb-4">Contact</h3>
+        <div class="kv"><span class="k">Email</span><span class="v">${esc(c.email)}</span></div>
+        <div class="kv"><span class="k">Phone</span><span class="v">${esc(c.phone)}</span></div>
+        <div class="kv"><span class="k">Age</span><span class="v">${c.childAge}</span></div>
+        <div class="kv"><span class="k">Waiver</span><span class="v">${c.waiver?pill("On file","green"):pill("Missing","red")}</span></div>
+        <div class="kv"><span class="k">Member since</span><span class="v">${esc(fmtDate(parseISO(c.since)))}</span></div>
+      </div><div class="card">
+        <h3 class="mb-4">Snapshot</h3>
+        <div class="kv"><span class="k">Membership</span><span class="v">${esc(c.membership)}</span></div>
+        <div class="kv"><span class="k">Lifetime spend</span><span class="v">${money(c.spent)}</span></div>
+        <div class="kv"><span class="k">Sessions logged</span><span class="v">${sessions.length}</span></div>
+        <div class="kv"><span class="k">Credits remaining</span><span class="v">${mem?(mem.unlimited?"Unlimited":Math.max(0,(mem.credits||0)-lessonsUsed)):"—"}</span></div>
+      </div></div>`;
+  }
+  if(tab==="billing"){
+    const next = addMonths(parseISO(c.paid),1);
+    return `<div class="grid-2"><div class="card">
+        <h3 class="mb-4">Billing</h3>
+        <div class="kv"><span class="k">Payment method</span><span class="v">Visa ···· 4242</span></div>
+        <div class="kv"><span class="k">Plan</span><span class="v">${esc(c.membership)}${mem?" · "+money(mem.price)+"/"+(mem.frequency==="Monthly"?"mo":esc(mem.frequency)):""}</span></div>
+        <div class="kv"><span class="k">Last payment</span><span class="v">${esc(fmtDate(parseISO(c.paid)))}</span></div>
+        <div class="kv"><span class="k">Next bill date</span><span class="v">${esc(fmtDate(next))}</span></div>
+        <div class="kv"><span class="k">Lifetime spend</span><span class="v">${money(c.spent)}</span></div>
+        <button class="btn btn-secondary mt-4" data-action="cust-billing-update">Update payment method</button>
+      </div><div class="card">
+        <h3 class="mb-4">Recent Charges</h3>
+        ${txns.slice(0,6).map(t=>`<div class="kv"><span class="k">${esc(t.date)} · ${esc(t.service)}</span><span class="v">${money(t.amount)}</span></div>`).join("")||'<div class="empty">No charges.</div>'}
+      </div></div>`;
+  }
+  if(tab==="memberships"){
+    if(!mem) return `<div class="card"><div class="empty">No active membership. <button class="row-link" data-action="cust-edit" data-id="${c.id}">Assign one →</button></div></div>`;
+    return `<div class="card">
+      <div class="flex between center"><h3>${esc(mem.name)}</h3>${mem.unlimited?pill("Unlimited credits","green"):pill(mem.credits+" credits","blue")}</div>
+      <p class="small muted mt-3">${esc(mem.description||"")}</p>
+      <div class="divider"></div>
+      <div class="kv"><span class="k">Price</span><span class="v">${money(mem.price)} · ${esc(mem.frequency)}</span></div>
+      <div class="kv"><span class="k">Credits included</span><span class="v">${mem.unlimited?"Unlimited":creditsLabel(mem)}</span></div>
+      <div class="kv"><span class="k">Applicable discount</span><span class="v">${esc(mem.discount||"—")}</span></div>
+      <div class="kv"><span class="k">Notes</span><span class="v" style="max-width:60%;text-align:right;">${esc(mem.notes||"—")}</span></div>
+      <button class="btn btn-secondary mt-4" data-action="cust-edit" data-id="${c.id}">Change plan</button>
+    </div>`;
+  }
+  if(tab==="packages"){
+    return `<div class="table-card"><div class="table-head"><h3>Packages Purchased</h3></div><div class="table-scroll"><table>
+      <thead><tr><th>Package</th><th>Purchased</th><th>Sessions Remaining</th><th class="text-right">Paid</th></tr></thead>
+      <tbody>${pkgs.length?pkgs.map(t=>{ const total=/10-Pack/.test(t.service)?10:/5-Pack/.test(t.service)?5:/8/.test(t.service)?8:4; const used=Math.min(total, sessions.length); return `<tr><td class="b">${esc(t.service)}</td><td>${esc(t.date)}</td><td>${Math.max(0,total-used)} of ${total}</td><td class="text-right b">${money(t.amount)}</td></tr>`;}).join(""):`<tr><td colspan="4"><div class="empty">No packages purchased.</div></td></tr>`}</tbody>
+    </table></div></div>`;
+  }
+  if(tab==="activity"){
+    return `<div class="table-card"><div class="table-head"><h3>Session Activity</h3><div class="xs muted">${sessions.length} sessions</div></div><div class="table-scroll"><table>
+      <thead><tr><th>Date</th><th>Service</th><th>Type</th><th>Staff</th><th>Room</th></tr></thead>
+      <tbody>${sessions.length?sessions.map(t=>`<tr><td>${esc(t.date)}</td><td class="b">${esc(t.service)}</td><td>${pill(t.type,t.type==="rental"?"slate":t.type==="class"?"purple":"blue")}</td><td>${esc(t.staff==="System"?"System":coachName(t.staff))}</td><td>${esc(t.room)}</td></tr>`).join(""):`<tr><td colspan="5"><div class="empty">No session activity.</div></td></tr>`}</tbody>
+    </table></div></div>`;
+  }
+  if(tab==="invoices"){
+    return `<div class="table-card"><div class="table-head"><h3>Invoices</h3></div><div class="table-scroll"><table>
+      <thead><tr><th>Invoice</th><th>Date</th><th>Service</th><th>Status</th><th class="text-right">Amount</th><th></th></tr></thead>
+      <tbody>${txns.length?txns.map(t=>`<tr><td class="mono">INV-${esc(t.id.replace("TXN-",""))}</td><td>${esc(t.date)}</td><td>${esc(t.service)}</td><td>${pill(t.amount===0?"Comp":"Paid",t.amount===0?"slate":"green")}</td><td class="text-right b">${money(t.amount)}</td><td class="text-right"><button class="btn btn-secondary btn-sm" data-action="cust-invoice" data-id="${esc(t.id)}">PDF</button></td></tr>`).join(""):`<tr><td colspan="6"><div class="empty">No invoices.</div></td></tr>`}</tbody>
+    </table></div></div>`;
+  }
+  // credits
+  const included = mem?(mem.unlimited?"Unlimited":(mem.credits||0)):0;
+  const remaining = mem?(mem.unlimited?"Unlimited":Math.max(0,(mem.credits||0)-lessonsUsed)):0;
+  return `<div class="grid-3 mb-4">
+      ${statCard("Credits Remaining", String(remaining), mem?(mem.unlimited?"unlimited plan":"resets "+fmtDateShort(addMonths(parseISO(c.paid),1))):"no plan")}
+      ${statCard("Included / Period", String(included), mem?esc(mem.name):"—",{blue:true})}
+      ${statCard("Used This Period", String(lessonsUsed), "1 credit = 1 lesson")}
+    </div>
+    <div class="card"><div class="flex between center mb-4"><h3>Credit Ledger</h3><button class="btn btn-secondary btn-sm" data-action="cust-add-credits" data-id="${c.id}">Adjust credits</button></div>
+    ${mem&&mem.credits?`<div class="kv"><span class="k">Period grant — ${esc(mem.name)}</span><span class="v" style="color:var(--tac-green)">+${mem.credits}</span></div>`:""}
+    ${txns.filter(t=>t.type==="lesson"||t.type==="class").map(t=>`<div class="kv"><span class="k">${esc(t.date)} · ${esc(t.service)}</span><span class="v" style="color:var(--tac-red)">−1</span></div>`).join("")||'<div class="empty">No credit activity.</div>'}
+    </div>`;
+}
+function customerFields(c){ c=c||{}; return [
+  {key:"name",label:"Full name",type:"text",value:c.name,required:true},
+  {key:"email",label:"Email",type:"email",value:c.email,half:true,required:true},
+  {key:"phone",label:"Phone",type:"text",value:c.phone,half:true},
+  {key:"childAge",label:"Age",type:"number",value:c.childAge,half:true},
+  {key:"membership",label:"Membership",type:"select",value:c.membership||"Unlimited Training",options:MEMBERSHIPS.map(m=>m.name).concat(["None"]),half:true},
+  {key:"paid",label:"Last paid date",type:"date",value:c.paid||iso(TODAY),half:true},
+  {key:"since",label:"Member since",type:"date",value:c.since||iso(TODAY),half:true},
+  {key:"waiver",label:"Waiver on file",type:"checkbox",value:c.waiver!=null?c.waiver:false},
+];}
+handleAction["cust-search"] = el=>{ state.cust.q=el.value; };
+handleAction["cust-view"] = el=>{ state.custView=el.dataset.id; state.custTab="profile"; state.page="customers"; render(); document.getElementById("content").scrollTop=0; };
+handleAction["cust-back"] = ()=>{ state.custView=null; render(); };
+handleAction["cust-tab"] = el=>{ state.custTab=el.dataset.tab; render(); document.getElementById("content").scrollTop=0; };
+handleAction["cust-billing-update"] = ()=>{ openModal({title:"Update Payment Method",fields:[{key:"card",label:"Card number",type:"text",value:"",placeholder:"•••• •••• •••• 4242"},{key:"exp",label:"Expiry",type:"text",value:"",half:true,placeholder:"MM/YY"},{key:"cvc",label:"CVC",type:"text",value:"",half:true}],submitLabel:"Save Card",onSubmit:()=>{closeModal();toast("Payment method updated");}}); };
+handleAction["cust-invoice"] = el=>{ toast("Invoice "+el.dataset.id+" downloaded (PDF)"); };
+handleAction["cust-add-credits"] = el=>{ const c=custById(el.dataset.id); openModal({title:"Adjust Credits — "+(c?c.name:""),desc:"Manually add or remove lesson credits.",fields:[{key:"delta",label:"Credit change (+/−)",type:"number",value:0,required:true},{key:"reason",label:"Reason",type:"text",value:"",placeholder:"e.g. goodwill, refund, correction"}],submitLabel:"Apply",onSubmit:data=>{closeModal();toast((Number(data.delta)>=0?"Added ":"Removed ")+Math.abs(Number(data.delta)||0)+" credit(s)");}}); };
+handleAction["cust-book"] = el=>{ const c=custById(el.dataset.id); openBookingModal({customer:c?c.name:""}); };
+handleAction["cust-new"] = ()=>{
+  openModal({ title:"New Customer", desc:"Add a customer and capture their waiver status.", fields:customerFields(null), submitLabel:"Add Customer",
+    onSubmit:data=>{ data.childAge=Number(data.childAge||0); data.spent=0; data.id="u"+Date.now(); CUSTOMERS.unshift(data); closeModal(); toast("Customer added"); render(); } });
+};
+handleAction["cust-edit"] = el=>{
+  const c=custById(el.dataset.id);
+  openModal({ title:"Edit Customer", fields:customerFields(c), submitLabel:"Save Changes",
+    onSubmit:data=>{ data.childAge=Number(data.childAge||0); Object.assign(c,data); closeModal(); toast("Customer updated"); render(); } });
+};
+handleAction["cust-import"] = ()=>{
+  openModal({ title:"Import Customers", desc:"Upload a CSV to bulk-add customers.",
+    bodyHTML:`<label class="field full"><span class="field-label">CSV file</span><input type="file" accept=".csv" /></label>
+      <p class="small muted mt-3">Expected columns: name, email, phone, child age, membership, waiver. <button type="button" class="row-link" data-action="noop">Download template</button></p>`,
+    submitLabel:"Import",
+    onSubmit:()=>{ closeModal(); toast("Import queued — customers will appear shortly"); } });
+};
+handleAction["noop"] = ()=> toast("Template downloaded");
+
+/* ============================================================
+   MARKETING
+   ============================================================ */
+function pageCoupons(){
+  return `
+    <div class="card card-tight mb-4 flex between center"><h2>Coupons</h2><button class="btn btn-primary" data-action="coupon-new">+ New Coupon</button></div>
+    <div class="table-card"><div class="table-scroll"><table>
+      <caption class="sr-only">Coupons</caption>
+      <thead><tr><th>Name</th><th>Code</th><th>Discount</th><th>Status</th><th class="text-right">Times Used</th><th><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody>${COUPONS.map(c=>`<tr class="clickable" data-action="coupon-edit" data-id="${c.id}">
+        <td class="b">${esc(c.name)}</td><td class="mono">${esc(c.code)}</td><td>${esc(c.discount)}</td>
+        <td>${pill(c.status, c.status==="Active"?"green":"slate")}</td><td class="text-right b">${c.uses}</td>
+        <td class="text-right"><button class="btn btn-secondary btn-sm" data-action="coupon-edit" data-id="${c.id}">Edit</button></td>
+      </tr>`).join("")}</tbody>
+    </table></div></div>`;
+}
+function pageEmailBlasts(){
+  return `
+    <div class="card card-tight mb-4 flex between center"><h2>Email Blasts</h2><button class="btn btn-primary" data-action="blast-new">+ New Blast</button></div>
+    <div class="table-card"><div class="table-scroll"><table>
+      <caption class="sr-only">Email blasts</caption>
+      <thead><tr><th>Subject</th><th>Sent</th><th class="text-right">Delivered</th><th class="text-right">Opened</th><th class="text-right">Open Rate</th><th><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody>${BLASTS.map(b=>{ const rate=(b.opened/b.delivered*100); const col=rate>40?"green":rate>30?"blue":"amber";
+        return `<tr class="clickable" data-action="blast-edit" data-id="${b.id}">
+        <td class="b">${esc(b.subject)}</td><td>${esc(b.sent)}</td><td class="text-right">${b.delivered.toLocaleString()}</td>
+        <td class="text-right">${b.opened.toLocaleString()}</td><td class="text-right">${pill(rate.toFixed(1)+"%",col)}</td>
+        <td class="text-right"><button class="btn btn-secondary btn-sm" data-action="blast-edit" data-id="${b.id}">Edit</button></td>
+      </tr>`; }).join("")}</tbody>
+    </table></div></div>`;
+}
+function couponFields(c){ c=c||{}; return [
+  {key:"name",label:"Coupon name",type:"text",value:c.name,required:true},
+  {key:"code",label:"Code",type:"text",value:c.code,half:true,required:true},
+  {key:"discount",label:"Discount",type:"text",value:c.discount,half:true,placeholder:"e.g. 15% off or $25 off"},
+  {key:"status",label:"Status",type:"select",value:c.status||"Active",options:["Active","Expired"],half:true},
+  {key:"uses",label:"Times used",type:"number",value:c.uses||0,half:true},
+];}
+function blastFields(b){ b=b||{}; return [
+  {key:"subject",label:"Subject line",type:"text",value:b.subject,required:true},
+  {key:"sent",label:"Send date",type:"date",value:b.sent||iso(TODAY),half:true},
+  {key:"delivered",label:"Delivered",type:"number",value:b.delivered||0,half:true},
+  {key:"opened",label:"Opened",type:"number",value:b.opened||0,half:true},
+];}
+handleAction["coupon-new"] = ()=> openModal({title:"New Coupon",fields:couponFields(null),submitLabel:"Create Coupon",onSubmit:data=>{data.uses=Number(data.uses||0);data.id="co"+Date.now();COUPONS.unshift(data);closeModal();toast("Coupon created");render();}});
+handleAction["coupon-edit"] = el=>{ const c=COUPONS.find(x=>x.id===el.dataset.id); openModal({title:"Edit Coupon",fields:couponFields(c),submitLabel:"Save Changes",onSubmit:data=>{data.uses=Number(data.uses||0);Object.assign(c,data);closeModal();toast("Coupon updated");render();}}); };
+handleAction["blast-new"] = ()=> openModal({title:"New Email Blast",desc:"Compose and schedule a campaign.",fields:blastFields(null),submitLabel:"Schedule Blast",onSubmit:data=>{data.delivered=Number(data.delivered||0);data.opened=Number(data.opened||0);data.id="b"+Date.now();BLASTS.unshift(data);closeModal();toast("Email blast scheduled");render();}});
+handleAction["blast-edit"] = el=>{ const b=BLASTS.find(x=>x.id===el.dataset.id); openModal({title:"Edit Email Blast",fields:blastFields(b),submitLabel:"Save Changes",onSubmit:data=>{data.delivered=Number(data.delivered||0);data.opened=Number(data.opened||0);Object.assign(b,data);closeModal();toast("Blast updated");render();}}); };
+
+/* ============================================================
+   REPORTS  (Bookings · Occupancy · Customers · Attendance)
+   ============================================================ */
+const SERVICE_TYPES = [["","Any service type"],["lesson","Lessons"],["class","Classes"],["membership","Memberships"],["package","Packages"],["rental","Rentals"]];
+function allServiceNames(){ return [].concat(LESSONS.map(s=>s.name),CLASSES.map(s=>s.name),MEMBERSHIPS.map(s=>s.name+" Membership"),PACKAGES.map(s=>s.name),RENTALS.map(s=>s.name)); }
+function timeToHour(s){ const m=String(s).match(/(\d+):00\s*(AM|PM)/i); if(!m) return null; let h=Number(m[1])%12; if(/pm/i.test(m[2])) h+=12; return h; }
+function durHrs(t){ const a=timeToHour(t.start), b=timeToHour(t.end); return (a!=null&&b!=null)?Math.max(b-a,1):1; }
+function rangeBounds(f){
+  f=f||{}; if(f.range==="all") return ["0000-00-00","9999-99-99"];
+  if(f.range==="custom" && f.from && f.to) return [f.from, f.to];
+  const days = f.range==="2weeks"?14:f.range==="3months"?90:30;
+  return [iso(addDays(TODAY,-days)), iso(TODAY)];
+}
+function applyTxnFilters(f){
+  const [s,e] = rangeBounds(f);
+  return TRANSACTIONS.filter(t=>{
+    if(t.date<s||t.date>e) return false;
+    if(f.customer && !t.customer.toLowerCase().includes(f.customer.toLowerCase())) return false;
+    if(f.staff && t.staff!==f.staff) return false;
+    if(f.serviceType && t.type!==f.serviceType) return false;
+    if(f.service && t.service!==f.service) return false;
+    if(f.room && t.room!==f.room) return false;
+    return true;
+  });
+}
+function staffOptions(){ return [{value:"",label:"Any staff"}].concat(COACHES.map(c=>({value:c.id,label:c.name}))); }
+function serviceOptions(){ return [{value:"",label:"Any service"}].concat(allServiceNames().map(n=>({value:n,label:n}))); }
+function roomOptions(){ return [{value:"",label:"Any room"}].concat(ROOMS.map(r=>({value:r,label:r}))); }
+function rangeOptions(){ return [{value:"2weeks",label:"Last 2 weeks"},{value:"month",label:"Last month"},{value:"3months",label:"Last 3 months"},{value:"all",label:"All time"},{value:"custom",label:"Custom range"}]; }
+function selField(tab,field,label,options){ const v=state.filters[tab][field]||"";
+  return `<label class="field"><span class="field-label">${esc(label)}</span><select data-action="filter-set" data-tab="${tab}" data-field="${field}">${options.map(o=>{const val=typeof o==="object"?o.value:o[0];const lab=typeof o==="object"?o.label:o[1];return `<option value="${esc(val)}" ${String(v)===String(val)?"selected":""}>${esc(lab)}</option>`;}).join("")}</select></label>`; }
+function txtField(tab,field,label,ph){ const v=state.filters[tab][field]||"";
+  return `<label class="field"><span class="field-label">${esc(label)}</span><input type="text" value="${esc(v)}" placeholder="${esc(ph||"")}" data-action="filter-set" data-tab="${tab}" data-field="${field}" autocomplete="off"></label>`; }
+function dateField(tab,field,label){ const v=state.filters[tab][field]||"";
+  return `<label class="field"><span class="field-label">${esc(label)}</span><input type="date" value="${esc(v)}" data-action="filter-set" data-tab="${tab}" data-field="${field}"></label>`; }
+function runClear(tab){ return `<div class="flex gap-2" style="align-items:flex-end;"><button class="btn btn-secondary" data-action="report-clear" data-tab="${tab}">Clear</button><button class="btn btn-primary" data-action="report-run" data-tab="${tab}">Run</button></div>`; }
+
+function pageReports(){
+  const tab = state.reportTab;
+  const tabs = [["bookings","Bookings"],["occupancy","Occupancy"],["customers","Customers"],["attendance","Attendance"]];
+  let body = tab==="bookings"?reportBookings():tab==="occupancy"?reportOccupancy():tab==="customers"?reportCustomers():reportAttendance();
+  return `<div class="tabs mb-4" role="tablist">${tabs.map(t=>`<button class="tab ${tab===t[0]?"active":""}" role="tab" aria-selected="${tab===t[0]}" data-action="report-tab" data-tab="${t[0]}">${t[1]}</button>`).join("")}</div>${body}`;
+}
+
+function reportBookings(){
+  const f = state.applied.bookings; const list = applyTxnFilters(f);
+  const totalRev = list.reduce((s,t)=>s+t.amount,0);
+  const sessions = list.filter(t=>["lesson","class","rental"].includes(t.type));
+  const totalHours = sessions.reduce((s,t)=>s+durHrs(t),0);
+  const perPage=10, totalPages=Math.max(1,Math.ceil(list.length/perPage)), pg=Math.min(state.reportsPage,totalPages);
+  const slice=list.slice((pg-1)*perPage, (pg-1)*perPage+perPage);
+  return `
+    <div class="card mb-4">
+      <div class="form-grid" style="grid-template-columns:repeat(3,1fr);align-items:end;">
+        ${selField("bookings","range","Time period",rangeOptions())}
+        ${txtField("bookings","customer","Customer","Any name")}
+        ${selField("bookings","staff","Staff member",staffOptions())}
+        ${selField("bookings","serviceType","Service type",SERVICE_TYPES)}
+        ${selField("bookings","service","Service",serviceOptions())}
+        ${selField("bookings","room","Room",roomOptions())}
+        ${state.filters.bookings.range==="custom"?dateField("bookings","from","From")+dateField("bookings","to","To"):""}
+        ${runClear("bookings")}
+      </div>
+    </div>
+    <div class="grid-3 mb-4">
+      ${statCard("Total Bookings", String(list.length), rangeLabel(f))}
+      ${statCard("Total Hours Booked", totalHours+" hrs", sessions.length+" sessions",{blue:true})}
+      ${statCard("Amount Collected", money(totalRev), "in this view")}
+    </div>
+    <div class="table-card"><div class="table-head"><h3>Transactions</h3><div class="xs muted">Page ${pg} of ${totalPages}</div></div>
+    <div class="table-scroll"><table><thead><tr><th>Transaction</th><th>Date</th><th>Customer</th><th>Staff</th><th>Service</th><th class="text-right">Amount</th></tr></thead>
+    <tbody>${slice.length?slice.map(t=>`<tr><td class="mono">${esc(t.id)}</td><td>${esc(t.date)}</td><td class="b">${esc(t.customer)}</td><td>${esc(t.staff==="System"?"System":coachName(t.staff))}</td><td>${esc(t.service)}</td><td class="text-right b">${money(t.amount)}</td></tr>`).join(""):`<tr><td colspan="6"><div class="empty">No bookings match these filters.</div></td></tr>`}</tbody></table></div>
+    <div class="pager"><div>Showing ${list.length?((pg-1)*perPage+1):0}–${Math.min(pg*perPage,list.length)} of ${list.length}</div>
+    <div class="flex gap-2"><button class="pg-btn" data-action="report-page" data-page="prev" ${pg<=1?"disabled":""}>Prev</button>
+    ${Array.from({length:totalPages},(_,i)=>i+1).map(n=>`<button class="pg-btn ${pg===n?"active":""}" data-action="report-page" data-page="${n}">${n}</button>`).join("")}
+    <button class="pg-btn" data-action="report-page" data-page="next" ${pg>=totalPages?"disabled":""}>Next</button></div></div></div>`;
+}
+function rangeLabel(f){ const o=rangeOptions().find(o=>o.value===(f.range||"month")); return o?o.label:""; }
+
+function reportOccupancy(){
+  const f = state.applied.occupancy || {range:"month"};
+  const usage = applyTxnFilters(f).filter(t=>t.room && t.room!=="—" && t.start!=="—");
+  const byRoom={}, byDay={}, byTime={}, revTime={}, revDay={}, revSvc={};
+  usage.forEach(t=>{ const dn=dayName(parseISO(t.date)); const h=durHrs(t);
+    byRoom[t.room]=(byRoom[t.room]||0)+h; byDay[dn]=(byDay[dn]||0)+h; byTime[t.start]=(byTime[t.start]||0)+h;
+    revTime[t.start]=(revTime[t.start]||0)+t.amount; revDay[dn]=(revDay[dn]||0)+t.amount; revSvc[t.service]=(revSvc[t.service]||0)+t.amount; });
+  const totalHours = usage.reduce((s,t)=>s+durHrs(t),0);
+  const totalRev = usage.reduce((s,t)=>s+t.amount,0);
+  const busiestDay = topKey(byDay), busiestRoom = topKey(byRoom);
+  const dayOrder=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  const bars = (obj,order,blue)=>{ const keys=order||Object.keys(obj); const max=Math.max(1,...keys.map(k=>obj[k]||0));
+    return `<div class="vbars">${keys.map(k=>`<div class="vbar-col"><span class="vbar-val">${obj[k]||0}</span><div class="vbar ${blue?"blue":""}" style="height:${Math.round((obj[k]||0)/max*120)+4}px"></div><span class="vbar-lab">${esc((k+"").slice(0,3))}</span></div>`).join("")}</div>`; };
+  const rankList=(obj,unit,best)=>{ const arr=Object.entries(obj).sort((a,b)=>best?b[1]-a[1]:a[1]-b[1]).slice(0,3);
+    return arr.length?arr.map(([k,v])=>`<div class="kv"><span class="k">${esc(k)}</span><span class="v">${unit==="$"?money(v):v+" "+unit}</span></div>`).join(""):`<div class="empty">No data.</div>`; };
+  return `
+    <div class="card card-tight mb-4"><div class="form-grid" style="grid-template-columns:1fr auto;align-items:end;max-width:520px;">
+      ${selField("occupancy","range","Time period",rangeOptions())}${runClear("occupancy")}</div></div>
+    <div class="grid-4 mb-4">
+      ${statCard("Sessions Logged", String(usage.length), rangeLabel(f))}
+      ${statCard("Facility Hours Used", totalHours+" hrs", "across 8 rooms",{blue:true})}
+      ${statCard("Session Revenue", money(totalRev), "this view")}
+      ${statCard("Busiest Day", busiestDay||"—", busiestRoom?("Top room: "+busiestRoom):"")}
+    </div>
+    <div class="grid-3 mb-4">
+      <div class="card"><h3 class="mb-4">Usage by Room (hrs)</h3>${bars(byRoom,ROOMS)}</div>
+      <div class="card"><h3 class="mb-4">Weekly Usage by Day (hrs)</h3>${bars(byDay,dayOrder,true)}</div>
+      <div class="card"><h3 class="mb-4">Daily Usage by Time (hrs)</h3>${bars(byTime,Object.keys(byTime).sort((a,b)=>timeToHour(a)-timeToHour(b)))}</div>
+    </div>
+    <div class="grid-2 mb-4">
+      <div class="card"><h3 class="mb-4" style="color:var(--tac-green)">Best by Revenue</h3>
+        <div class="small b muted">By time</div>${rankList(revTime,"$",true)}<div class="divider"></div>
+        <div class="small b muted">By day</div>${rankList(revDay,"$",true)}<div class="divider"></div>
+        <div class="small b muted">By class / service</div>${rankList(revSvc,"$",true)}</div>
+      <div class="card"><h3 class="mb-4" style="color:var(--tac-red)">Lowest by Revenue</h3>
+        <div class="small b muted">By time</div>${rankList(revTime,"$",false)}<div class="divider"></div>
+        <div class="small b muted">By day</div>${rankList(revDay,"$",false)}<div class="divider"></div>
+        <div class="small b muted">By class / service</div>${rankList(revSvc,"$",false)}</div>
+    </div>
+    <div class="table-card"><div class="table-head"><h3>Recent Facility Usage</h3><div class="xs muted">${usage.length} sessions</div></div>
+    <div class="table-scroll"><table><thead><tr><th>ID</th><th>Date</th><th>Day</th><th>Start</th><th>End</th><th>Duration</th><th>Room</th><th>Service</th><th>Type</th><th class="text-right">Revenue</th></tr></thead>
+    <tbody>${usage.length?usage.map(t=>`<tr><td class="mono">${esc(t.id)}</td><td>${esc(t.date)}</td><td>${esc(dayName(parseISO(t.date)).slice(0,3))}</td><td>${esc(t.start)}</td><td>${esc(t.end)}</td><td>${durHrs(t)} hr</td><td>${esc(t.room)}</td><td>${esc(t.service)}</td><td>${pill(t.type, t.type==="rental"?"slate":t.type==="class"?"purple":"blue")}</td><td class="text-right b">${money(t.amount)}</td></tr>`).join(""):`<tr><td colspan="10"><div class="empty">No usage in this period.</div></td></tr>`}</tbody></table></div></div>`;
+}
+function topKey(obj){ let k=null,m=-1; for(const x in obj){ if(obj[x]>m){m=obj[x];k=x;} } return k; }
+
+function reportCustomers(){
+  const f = state.applied.customers; const list = applyTxnFilters({range:f.range, staff:f.staff, serviceType:f.serviceType, service:f.service});
+  // build per-customer rollup
+  const map={};
+  list.forEach(t=>{ const key=t.customer; if(!map[key]) map[key]={name:t.customer, services:new Set()}; map[key].services.add(t.service); });
+  const rows = Object.values(map).map(r=>{ const c=CUSTOMERS.find(c=>c.name===r.name || r.name.includes(c.name.split(" ")[0])); return {name:r.name, membership:c?c.membership:"—", phone:c?c.phone:"—", email:c?c.email:"—", services:Array.from(r.services)}; });
+  return `
+    <div class="card mb-4"><div class="form-grid" style="grid-template-columns:repeat(4,1fr);align-items:end;">
+      ${selField("customers","staff","Staff member",staffOptions())}
+      ${selField("customers","serviceType","Service type",SERVICE_TYPES)}
+      ${selField("customers","service","Service provided",serviceOptions())}
+      ${selField("customers","range","Date range",rangeOptions())}
+      ${state.filters.customers.range==="custom"?dateField("customers","from","From")+dateField("customers","to","To"):""}
+      ${runClear("customers")}
+    </div></div>
+    <div class="table-card"><div class="table-head"><h3>Customers Matching Filters</h3><div class="xs muted">${rows.length} customers</div></div>
+    <div class="table-scroll"><table><thead><tr><th>Customer</th><th>Membership</th><th>Phone</th><th>Email</th><th>Service(s)</th></tr></thead>
+    <tbody>${rows.length?rows.map(r=>`<tr><td class="b">${esc(r.name)}</td><td>${r.membership==="—"?"—":pill(r.membership,"blue")}</td><td class="small">${esc(r.phone)}</td><td class="small muted">${esc(r.email)}</td><td class="small">${r.services.map(s=>esc(s)).join(", ")}</td></tr>`).join(""):`<tr><td colspan="5"><div class="empty">No customers match these filters.</div></td></tr>`}</tbody></table></div></div>`;
+}
+
+function reportAttendance(){
+  const f = state.applied.attendance;
+  const list = applyTxnFilters({range:f.range, customer:f.customer, serviceType:f.serviceType, service:f.service, from:f.from, to:f.to})
+    .filter(t=>["lesson","class","rental"].includes(t.type))
+    .slice().sort((a,b)=> b.date.localeCompare(a.date) || (timeToHour(b.start)||0)-(timeToHour(a.start)||0));
+  return `
+    <div class="card mb-4"><div class="form-grid" style="grid-template-columns:repeat(4,1fr);align-items:end;">
+      ${txtField("attendance","customer","Customer","Any name")}
+      ${selField("attendance","serviceType","Service type",SERVICE_TYPES)}
+      ${selField("attendance","service","Service",serviceOptions())}
+      ${selField("attendance","range","Date range",rangeOptions())}
+      ${state.filters.attendance.range==="custom"?dateField("attendance","from","From")+dateField("attendance","to","To"):""}
+      ${runClear("attendance")}
+    </div></div>
+    <div class="table-card"><div class="table-head"><h3>Most Recent Attendance</h3><div class="xs muted">${list.length} sessions · newest first</div></div>
+    <div class="table-scroll"><table><thead><tr><th>Customer</th><th>Service</th><th>Type</th><th>Date</th><th>Time</th><th>Staff</th><th>Room</th></tr></thead>
+    <tbody>${list.length?list.map(t=>`<tr><td class="b">${esc(t.customer)}</td><td>${esc(t.service)}</td><td>${pill(t.type,t.type==="rental"?"slate":t.type==="class"?"purple":"blue")}</td><td>${esc(t.date)}</td><td>${esc(t.start)}</td><td>${esc(t.staff==="System"?"System":coachName(t.staff))}</td><td>${esc(t.room)}</td></tr>`).join(""):`<tr><td colspan="7"><div class="empty">No attendance matches these filters.</div></td></tr>`}</tbody></table></div></div>`;
+}
+
+/* report handlers */
+const REPORT_DEFAULTS = {
+  bookings:{range:"month",customer:"",staff:"",serviceType:"",service:"",room:"",from:"",to:""},
+  occupancy:{range:"month",from:"",to:""},
+  customers:{staff:"",serviceType:"",service:"",range:"month",from:"",to:""},
+  attendance:{customer:"",serviceType:"",service:"",range:"month",from:"",to:""},
+};
+state.applied.occupancy = {range:"month"};
+handleAction["report-tab"] = el=>{ state.reportTab=el.dataset.tab; state.reportsPage=1; render(); };
+handleAction["filter-set"] = el=>{ const t=el.dataset.tab, fld=el.dataset.field; state.filters[t][fld]=el.value; if(fld==="range") render(); };
+handleAction["report-run"] = el=>{ const t=el.dataset.tab; state.applied[t]=Object.assign({},state.filters[t]); state.reportsPage=1; render(); toast("Filters applied"); };
+handleAction["report-clear"] = el=>{ const t=el.dataset.tab; state.filters[t]=Object.assign({},REPORT_DEFAULTS[t]); state.applied[t]=Object.assign({},REPORT_DEFAULTS[t]); state.reportsPage=1; render(); toast("Filters cleared"); };
+handleAction["report-page"] = el=>{ const v=el.dataset.page; const list=applyTxnFilters(state.applied.bookings); const tp=Math.max(1,Math.ceil(list.length/10));
+  if(v==="prev") state.reportsPage=Math.max(1,state.reportsPage-1); else if(v==="next") state.reportsPage=Math.min(tp,state.reportsPage+1); else state.reportsPage=Number(v); render(); };
+/* __PAGES__ */
+</script>
+</body>
+</html>
